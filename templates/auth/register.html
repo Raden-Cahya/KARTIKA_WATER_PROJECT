@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Akun Baru</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #008c9e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 350px;
+    }
+
+    .container h2 {
+      color: #008c9e;
+      margin-bottom: 10px;
+    }
+
+    .underline {
+      width: 50px;
+      height: 3px;
+      background: #008c9e;
+      margin: 0 auto 20px;
+      border-radius: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #008c9e;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      background: #00c2d1;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .login-link {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #008c9e;
+      text-decoration: none;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Daftar Akun Baru</h2>
+    <div class="underline"></div>
+
+    <form action="#" method="post">
+      <div class="form-group">
+        <label for="username">Nama Pengguna:</label>
+        <input type="text" id="username" name="username" placeholder="Masukkan nama pengguna Anda" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">email:</label>
+        <input type="text" id="email" name="email" placeholder="Masukkan email pengguna Anda" required>
+      </div>
+
+      <div class="form-group">
+        <label for="no_hp">No hp:</label>
+        <input type="number" id="no_hp" name="no_hp" placeholder="Masukkan no hp pengguna Anda" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Kata Sandi:</label>
+        <input type="password" id="password" name="password" placeholder="Masukkan kata sandi Anda" required>
+      </div>
+
+      <button type="submit" class="btn">Daftar</button>
+    </form>
+
+    <div class="login-link">
+      Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
+    </div>
+  </div>
+
+</body>
+</html>
