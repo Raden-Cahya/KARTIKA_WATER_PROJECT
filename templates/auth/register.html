@@ -1,121 +1,220 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar Akun Baru</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #008c9e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun Baru</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #008c9e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      text-align: center;
-      width: 350px;
-    }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
 
-    .container h2 {
-      color: #008c9e;
-      margin-bottom: 10px;
-    }
+        .container h2 {
+            color: #008c9e;
+            margin-bottom: 10px;
+        }
 
-    .underline {
-      width: 50px;
-      height: 3px;
-      background: #008c9e;
-      margin: 0 auto 20px;
-      border-radius: 5px;
-    }
+        .underline {
+            width: 50px;
+            height: 3px;
+            background: #008c9e;
+            margin: 0 auto 20px;
+            border-radius: 5px;
+        }
 
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
 
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #008c9e;
-    }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #008c9e;
+        }
 
-    .form-group input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
+        .form-group input,
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="number"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
 
-    .btn {
-      background: #00c2d1;
-      color: white;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      width: 100%;
-      margin-top: 10px;
-    }
+        .form-group .helptext {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+        }
 
-    .login-link {
-      margin-top: 15px;
-      font-size: 14px;
-    }
+        .btn {
+            background: #00c2d1;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
 
-    .login-link a {
-      color: #008c9e;
-      text-decoration: none;
-    }
+        .btn:hover {
+            background: #00a0ae;
+        }
 
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-  </style>
+        .login-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #008c9e;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .errorlist {
+            color: red;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 5px;
+            font-size: 0.9em;
+            text-align: left;
+        }
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .messages li {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .messages .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .messages .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Daftar Akun Baru</h2>
-    <div class="underline"></div>
+    <div class="container">
+        <h2>Daftar Akun Baru</h2>
+        <div class="underline"></div>
 
-    <form action="#" method="post">
-      <div class="form-group">
-        <label for="username">Nama Pengguna:</label>
-        <input type="text" id="username" name="username" placeholder="Masukkan nama pengguna Anda" required>
-      </div>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
-      <div class="form-group">
-        <label for="email">email:</label>
-        <input type="text" id="email" name="email" placeholder="Masukkan email pengguna Anda" required>
-      </div>
+        <form method="post">
+            {% csrf_token %}
 
-      <div class="form-group">
-        <label for="no_hp">No hp:</label>
-        <input type="number" id="no_hp" name="no_hp" placeholder="Masukkan no hp pengguna Anda" required>
-      </div>
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.help_text %}
+                    <span class="helptext">{{ form.username.help_text }}</span>
+                {% endif %}
+                {% if form.username.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
 
-      <div class="form-group">
-        <label for="password">Kata Sandi:</label>
-        <input type="password" id="password" name="password" placeholder="Masukkan kata sandi Anda" required>
-      </div>
+            <div class="form-group">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {% if form.email.help_text %}
+                    <span class="helptext">{{ form.email.help_text }}</span>
+                {% endif %}
+                {% if form.email.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
 
-      <button type="submit" class="btn">Daftar</button>
-    </form>
+            <div class="form-group">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% if form.password.help_text %}
+                    <span class="helptext">{{ form.password.help_text }}</span>
+                {% endif %}
+                {% if form.password.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
 
-    <div class="login-link">
-      Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <button type="submit" class="btn">Daftar</button>
+        </form>
+
+        <div class="login-link">
+            Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
+        </div>
     </div>
-  </div>
 
 </body>
 </html>

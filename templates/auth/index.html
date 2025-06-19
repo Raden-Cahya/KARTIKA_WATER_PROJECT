@@ -136,9 +136,9 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- <img src="https://via.placeholder.com/80x80/00bcd4/ffffff?text=💧" alt="Logo Galon Air" class="logo-galon"> -->
         <h2>Selamat Datang di  Kartika Water</h2>
         <form action="#" method="POST">
+            {% csrf_token %}
             <div class="input-group">
                 <label for="username">Nama Pengguna:</label>
                 <input type="text" id="username" name="username" placeholder="Masukkan nama pengguna Anda" required>
@@ -149,9 +149,6 @@
             </div>
             <button type="submit" class="btn-login">Masuk</button>
         </form>
-        <!-- <div class="forgot-password">
-            <a href="#">Lupa Kata Sandi?</a>
-        </div> -->
-    </div>
+        </div>
 </body>
 </html>
