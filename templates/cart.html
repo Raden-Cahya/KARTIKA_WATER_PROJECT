@@ -7,6 +7,11 @@
         <div class="row">
             <div class="col-lg-12">
                 <h2>Cart</h2>
+                <!-- Tambahkan breadcrumb jika perlu -->
+                <!-- <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                    <li class="breadcrumb-item active">Cart</li>
+                </ul> -->
             </div>
         </div>
     </div>
@@ -23,6 +28,7 @@
                         </div>
                     {% endfor %}
                 {% endif %}
+
                 {% if cart_items %}
                 <div class="table-main table-responsive">
                     <table class="table">
@@ -38,35 +44,48 @@
                         </thead>
                         <tbody>
                             {% for item in cart_items %}
-                            <tr>
+                            {# Tambahkan data attributes untuk JS #}
+                            <tr data-item-id="{{ item.id }}" data-product-stock="{{ item.product.stock }}">
                                 <td class="thumbnail-img">
                                     <a href="#">
                                         <img class="img-fluid" src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/default_product.jpg' %}{% endif %}" alt="" />
                                     </a>
                                 </td>
                                 <td class="name-pr">
-                                    <a href="#">
-                                        {{ item.product.name }}
-                                    </a>
+                                    <a href="#">{{ item.product.name }}</a>
                                 </td>
                                 <td class="price-pr">
-                                    <p>${{ item.product.price|floatformat:2 }}</p>
+                                    {# UBAH MATA UANG KE RUPIAH DI SINI #}
+                                    <p>Rp {{ item.product.price|floatformat:0 }}</p>
                                 </td>
                                 <td class="quantity-box">
-                                    <form action="{% url 'update_cart' item.id %}" method="post">
-                                        {% csrf_token %}
-                                        <input type="number" size="4" value="{{ item.quantity }}" min="1" step="1" class="c-input-text qty text" name="quantity" onchange="this.form.submit()">
-                                    </form>
+                                    <div class="input-group quantity-buttons">
+                                        <div class="input-group-prepend">
+                                            {# Tombol Minus #}
+                                            <button class="btn btn-outline-secondary minus-btn" type="button" {% if item.quantity == 1 %}disabled{% endif %}>-</button>
+                                        </div>
+                                        {# Input Quantity (readonly agar hanya bisa diubah via tombol) #}
+                                        <input type="text" class="form-control quantity-input text-center" value="{{ item.quantity }}" readonly>
+                                        <div class="input-group-append">
+                                            {# Tombol Plus #}
+                                            <button class="btn btn-outline-secondary plus-btn" type="button" {% if item.quantity >= item.product.stock %}disabled{% endif %}>+</button>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="total-pr">
-                                    <p>${{ item.get_total_item_price|floatformat:2 }}</p>
+                                    {# UBAH MATA UANG KE RUPIAH DI SINI #}
+                                    <p class="item-total-price">Rp {{ item.get_total_item_price|floatformat:0 }}</p>
                                 </td>
                                 <td class="remove-pr">
                                     <form action="{% url 'remove_from_cart' item.id %}" method="post">
                                         {% csrf_token %}
-                                        <button type="submit" style="background: none; border: none; cursor: pointer;"><i class="fas fa-times"></i></button>
+                                        <button type="submit" class="btn btn-link"><i class="fas fa-times"></i></button>
                                     </form>
                                 </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Keranjang Anda kosong.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -79,38 +98,163 @@
             </div>
         </div>
 
-        {% if cart_items %}
         <div class="row my-5">
-            <div class="col-lg-6 col-sm-6">
-                </div>
-            <div class="col-lg-6 col-sm-6">
-                <div class="update-box">
-                    </div>
-            </div>
-        </div>
-
-        <div class="row align-items-center">
-            <div class="col-lg-6 col-sm-12">
+            <div class="col-lg-8 col-sm-12"></div> {# Kosongkan kolom kiri untuk space #}
+            <div class="col-lg-4 col-sm-12">
                 <div class="order-box">
                     <h3>Order Summary</h3>
                     <div class="d-flex">
                         <h4>Sub Total</h4>
-                        <div class="ml-auto font-weight-bold"> ${{ total_price|floatformat:2 }} </div>
+                        {# UBAH MATA UANG KE RUPIAH DI SINI #}
+                        <div class="ml-auto font-weight-bold"> Rp <span id="sub-total-price">{{ total_price|floatformat:0 }}</span></div>
                     </div>
+                    <!-- Tambahkan biaya pengiriman, pajak, dll. jika ada -->
                     <div class="d-flex gr-total">
                         <h5>Grand Total</h5>
-                        <div class="ml-auto h5">${{ total_price|floatformat:2 }}</div>
+                        {# UBAH MATA UANG KE RUPIAH DI SINI #}
+                        <div class="ml-auto h5"> Rp <span id="grand-total-price">{{ total_price|floatformat:0 }}</span></div>
                     </div>
                     <hr> </div>
             </div>
-            <div class="col-lg-6 col-sm-12">
-                <div class="proceed-to-checkout">
-                    <a href="{% url 'checkout_process' %}" class="btn hvr-hover">Proceed to Checkout</a>
+        </div>
+
+        <div class="row my-5">
+            <div class="col-lg-12">
+                <div class="shop-button">
+                    <a href="{% url 'shop' %}" class="ml-auto btn hvr-hover">Continue Shopping</a>
+                    <a href="{% url 'checkout' %}" class="ml-auto btn hvr-hover">Checkout</a>
                 </div>
             </div>
         </div>
-        {% endif %}
-
     </div>
 </div>
+<!-- End Cart Page -->
+
+{% endblock %}
+
+{% block extra_js %}
+{# Pastikan Anda memuat jQuery, jika belum ada di template main.html atau base.html Anda #}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Fungsi untuk mendapatkan CSRF token dari cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Event listener untuk tombol plus dan minus
+    $('.quantity-buttons .plus-btn, .quantity-buttons .minus-btn').on('click', function() {
+        var $this = $(this);
+        var $input = $this.closest('.quantity-buttons').find('.quantity-input');
+        var currentQuantity = parseInt($input.val());
+        var itemId = $this.closest('tr').data('item-id');
+        var productStock = parseInt($this.closest('tr').data('product-stock')); // Ambil stok produk dari data attribute
+
+        var newQuantity;
+
+        if ($this.hasClass('plus-btn')) {
+            newQuantity = currentQuantity + 1;
+        } else { // minus-btn
+            newQuantity = currentQuantity - 1;
+        }
+
+        // --- VALIDASI SISI KLIEN ---
+        // Batasi kuantitas minimum 1
+        if (newQuantity < 1) {
+            newQuantity = 1;
+        }
+        // Batasi kuantitas agar tidak melebihi stok produk
+        if (newQuantity > productStock) {
+            newQuantity = productStock;
+        }
+
+        // Jika kuantitas tidak berubah setelah validasi, jangan kirim AJAX
+        if (newQuantity === currentQuantity) {
+            return; // Keluar dari fungsi
+        }
+
+        // Update nilai input quantity di UI
+        $input.val(newQuantity);
+
+        // --- ATUR STATUS TOMBOL BERDASARKAN VALIDASI BARU ---
+        // Tombol Minus
+        if (newQuantity <= 1) {
+            $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', true);
+        } else {
+            $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', false);
+        }
+
+        // Tombol Plus
+        if (newQuantity >= productStock) {
+            $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', true);
+        } else {
+            $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', false);
+        }
+        
+        // Kirim permintaan AJAX ke backend untuk memperbarui kuantitas di database
+        $.ajax({
+            url: "{% url 'update_cart_item_quantity' %}", // URL yang akan kita definisikan di main/urls.py
+            method: 'POST',
+            data: {
+                'item_id': itemId,
+                'quantity': newQuantity,
+                'csrfmiddlewaretoken': csrftoken
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Perbarui total harga item dan total keseluruhan di UI
+                    // response.new_item_total dan response.cart_total_price sudah diformat di server
+                    $this.closest('tr').find('.item-total-price').text('Rp ' + response.new_item_total);
+                    $('#sub-total-price').text('Rp ' + response.cart_total_price);
+                    $('#grand-total-price').text('Rp ' + response.cart_total_price);
+                } else {
+                    alert('Error memperbarui kuantitas: ' + response.error);
+                    // Jika ada error dari server, kembalikan kuantitas di UI ke nilai sebelumnya
+                    $input.val(currentQuantity);
+                    // Perbarui status tombol lagi berdasarkan nilai awal jika perlu
+                    if (currentQuantity >= productStock) {
+                        $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', true);
+                    } else {
+                        $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', false);
+                    }
+                    if (currentQuantity <= 1) {
+                        $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', true);
+                    } else {
+                        $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', false);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                alert('Terjadi kesalahan saat memperbarui keranjang.');
+                // Kembalikan kuantitas ke nilai sebelumnya jika AJAX gagal
+                $input.val(currentQuantity);
+                // Perbarui status tombol lagi berdasarkan nilai awal jika perlu
+                if (currentQuantity >= productStock) {
+                    $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', true);
+                } else {
+                    $this.closest('.quantity-buttons').find('.plus-btn').prop('disabled', false);
+                }
+                if (currentQuantity <= 1) {
+                    $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', true);
+                } else {
+                    $this.closest('.quantity-buttons').find('.minus-btn').prop('disabled', false);
+                }
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
