@@ -137,6 +137,13 @@
 <body>
     <div class="login-container">
         <h2>Selamat Datang di  Kartika Water</h2>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <form action="#" method="POST">
             {% csrf_token %}
             <div class="input-group">

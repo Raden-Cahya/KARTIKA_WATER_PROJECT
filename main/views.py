@@ -4,9 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse # <-- Pastikan ini ada
-from django.db import transaction # <-- Pastikan ini ada
-from .models import Product, Cart, CartItem, Order, OrderItem # Pastikan semua model diimport
+from django.http import JsonResponse
+from django.db import transaction
+from .models import Product, Cart, CartItem, Order, OrderItem
 
 # Import form kustom kita dari main/forms.py
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
@@ -42,9 +42,6 @@ def checkout(request):
     if not cart_items:
         messages.warning(request, "Keranjang Anda kosong. Silakan tambahkan produk terlebih dahulu.")
         return redirect('shop') # Redirect ke halaman shop jika keranjang kosong
-
-    # Anda bisa menambahkan logika lain di sini sebelum menampilkan halaman checkout,
-    # seperti validasi alamat pengiriman, metode pembayaran, dll.
 
     return render(request, 'checkout.html', {'cart': cart, 'cart_items': cart_items})
 
@@ -96,7 +93,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             messages.success(request, "Registrasi berhasil! Silakan login.")
-            return redirect('login') # Menggunakan 'login' yang sudah ada
+            return redirect('login')
         else:
             messages.error(request, "Terjadi kesalahan saat registrasi. Mohon periksa kembali input Anda.")
     else:
@@ -123,7 +120,6 @@ def add_to_cart(request, product_id):
     )
 
     if not item_created:
-        # Tambahkan validasi stok di sini juga
         if cart_item.quantity < product.stock:
             cart_item.quantity += 1
             cart_item.save()
@@ -133,9 +129,8 @@ def add_to_cart(request, product_id):
     else:
         messages.success(request, f"'{product.name}' telah ditambahkan ke keranjang Anda.")
 
-    return redirect('shop') # Redirect ke halaman shop setelah menambahkan
+    return redirect('shop')
 
-# GANTI FUNGSI update_cart LAMA DENGAN INI (AJAX-based)
 @login_required
 def update_cart_item_quantity(request):
     if request.method == 'POST':
@@ -149,25 +144,22 @@ def update_cart_item_quantity(request):
             cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
             product = cart_item.product
 
-            # Validasi sisi server untuk stok dan kuantitas minimum
             if new_quantity < 1:
                 new_quantity = 1
             if new_quantity > product.stock:
                 new_quantity = product.stock
 
-            # Jika kuantitas 0, hapus item (karena kita set minimum 1 di atas, ini untuk memastikan)
             if new_quantity == 0:
                 cart_item.delete()
-                # Langsung kembalikan sukses jika dihapus
-                cart = cart_item.cart # Dapatkan kembali keranjang setelah item dihapus
+                # Re-fetch the cart to ensure its items are updated and total is accurate
+                cart = get_object_or_404(Cart, user=request.user)
                 return JsonResponse({
                     'success': True,
-                    'new_quantity': 0, # Atau menunjukkan item dihapus
+                    'new_quantity': 0,
                     'new_item_total': 0,
-                    'cart_total_price': f"{cart.get_total_price():.0f}" # Format di sini
+                    'cart_total_price': f"{cart.get_total_price():.0f}"
                 })
             
-            # Jika kuantitas tidak berubah, tidak perlu update DB
             if cart_item.quantity == new_quantity:
                 return JsonResponse({
                     'success': True,
@@ -176,25 +168,24 @@ def update_cart_item_quantity(request):
                     'cart_total_price': f"{cart_item.cart.get_total_price():.0f}"
                 })
 
-            with transaction.atomic(): # Memastikan operasi database atomik
+            with transaction.atomic():
                 cart_item.quantity = new_quantity
                 cart_item.save()
 
-                cart = cart_item.cart # Dapatkan kembali objek cart setelah save
+                cart = cart_item.cart
                 cart_total_price = cart.get_total_price()
                 item_total_price = cart_item.get_total_item_price()
 
-            # Mengirim kembali harga yang sudah diformat ke client
             return JsonResponse({
                 'success': True,
                 'new_quantity': new_quantity,
-                'new_item_total': f"{item_total_price:.0f}", # Format sebagai integer string
-                'cart_total_price': f"{cart_total_price:.0f}" # Format sebagai integer string
+                'new_item_total': f"{item_total_price:.0f}",
+                'cart_total_price': f"{cart_total_price:.0f}"
             })
         except CartItem.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Item keranjang tidak ditemukan.'}, status=404)
         except Product.DoesNotExist:
-             return JsonResponse({'success': False, 'error': 'Produk tidak ditemukan.'}, status=404)
+            return JsonResponse({'success': False, 'error': 'Produk tidak ditemukan.'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': f'Terjadi kesalahan server: {str(e)}'}, status=500)
             
@@ -202,11 +193,11 @@ def update_cart_item_quantity(request):
 
 
 @login_required
-def remove_from_cart(request, item_id): # Ini adalah fungsi untuk menghapus item via form submit
+def remove_from_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     cart_item.delete()
     messages.info(request, "Item telah dihapus dari keranjang Anda.")
-    return redirect('cart_view')
+    return redirect('cart') # Menggunakan nama URL 'cart'
 
 @login_required
 def checkout_process(request):
@@ -222,28 +213,23 @@ def checkout_process(request):
             with transaction.atomic():
                 order = Order.objects.create(user=request.user)
                 for item in cart_items:
-                    # Validasi stok final sebelum membuat OrderItem
                     if item.product.stock >= item.quantity:
                         OrderItem.objects.create(
                             order=order,
                             product=item.product,
                             quantity=item.quantity,
-                            price=item.product.price # Simpan harga produk saat dipesan
+                            price=item.product.price
                         )
-                        # Kurangi stok produk
                         item.product.stock -= item.quantity
                         item.product.save()
                     else:
-                        # Jika stok tidak cukup, batalkan seluruh transaksi dan beri pesan error
                         messages.error(request, f"Stok tidak mencukupi untuk '{item.product.name}'. Silakan sesuaikan kuantitas di keranjang.")
-                        raise Exception("Stok tidak mencukupi") # Akan ditangkap oleh try-except
+                        raise Exception("Stok tidak mencukupi")
                 
-                cart_items.delete() # Kosongkan keranjang setelah pesanan berhasil dibuat
+                cart_items.delete()
                 messages.success(request, f"Pesanan Anda (ID: {order.id}) telah berhasil dibuat!")
-                return redirect('my_account') # Redirect ke halaman riwayat pesanan
+                return redirect('my_account')
         except Exception as e:
-            # Jika ada error saat transaksi (misal stok tidak cukup), redirect ke keranjang
-            return redirect('cart_view')
+            return redirect('cart') # Menggunakan nama URL 'cart'
             
-    # Jika method GET (akses halaman checkout langsung tanpa POST)
     return render(request, 'checkout.html', {'cart': cart, 'cart_items': cart_items})
