@@ -4,9 +4,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse # Import HttpResponse
 from django.db import transaction
 from .models import Product, Cart, CartItem, Order, OrderItem
+import json
+
+# Import untuk PDF
+from django.template.loader import get_template
+from weasyprint import HTML, CSS
+from django.conf import settings # Untuk mengakses pengaturan seperti STATIC_ROOT jika diperlukan
 
 # Import form kustom kita dari main/forms.py
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
@@ -20,20 +26,18 @@ def index(request):
 def about(request):
     return render(request, 'about.html')
 
-# View untuk menampilkan daftar produk
+@login_required
 def shop(request):
-    products = Product.objects.all() # Mengambil semua produk dari database
+    products = Product.objects.all()
     return render(request, 'shop.html', {'products': products})
 
-# View untuk menampilkan isi keranjang belanja
 @login_required
-def cart_view(request): # Nama fungsi di views
+def cart_view(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.all() # Pastikan Anda mendapatkan semua item dari keranjang
+    cart_items = cart.items.all()
     total_price = cart.get_total_price()
     return render(request, 'cart.html', {'cart': cart, 'cart_items': cart_items, 'total_price': total_price})
 
-# View untuk halaman checkout (sebelum proses finalisasi pesanan)
 @login_required
 def checkout(request):
     cart = get_object_or_404(Cart, user=request.user)
@@ -41,9 +45,24 @@ def checkout(request):
 
     if not cart_items:
         messages.warning(request, "Keranjang Anda kosong. Silakan tambahkan produk terlebih dahulu.")
-        return redirect('shop') # Redirect ke halaman shop jika keranjang kosong
+        return redirect('shop')
 
-    return render(request, 'checkout.html', {'cart': cart, 'cart_items': cart_items})
+    subtotal = sum(item.get_total_item_price() for item in cart_items)
+    discount = 0
+    tax = 0
+    shipping_cost = 0
+    grand_total = subtotal - discount + tax + shipping_cost
+
+    context = {
+        'cart': cart,
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'discount': discount,
+        'tax': tax,
+        'shipping_cost': shipping_cost,
+        'grand_total': grand_total,
+    }
+    return render(request, 'checkout.html', context)
 
 
 def contact(request):
@@ -52,14 +71,17 @@ def contact(request):
 def gallery(request):
     return render(request, 'gallery.html')
 
-# View untuk halaman My Account (menampilkan riwayat pesanan)
 @login_required
 def my_account(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'my-account.html', {'orders': orders})
 
 def shop_detail(request):
-    return render(request, 'shop-detail.html')
+    product_id = request.GET.get('product_id')
+    product = None
+    if product_id:
+        product = get_object_or_404(Product, id=product_id)
+    return render(request, 'shop-detail.html', {'product': product})
 
 def wishlist(request):
     return render(request, 'wishlist.html')
@@ -106,30 +128,37 @@ def user_logout(request):
     return redirect('index')
 
 
-# --- Views Keranjang dan Transaksi (Fungsi Baru/Diperbarui) ---
+# --- Views Keranjang dan Transaksi ---
 
 @login_required
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    cart, created = Cart.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        product = get_object_or_404(Product, id=product_id)
+        cart, created = Cart.objects.get_or_create(user=request.user)
 
-    cart_item, item_created = CartItem.objects.get_or_create(
-        cart=cart,
-        product=product,
-        defaults={'quantity': 1}
-    )
+        cart_item, item_created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': 1}
+        )
 
-    if not item_created:
-        if cart_item.quantity < product.stock:
-            cart_item.quantity += 1
-            cart_item.save()
-            messages.success(request, f"Kuantitas '{product.name}' di keranjang diperbarui menjadi {cart_item.quantity}.")
+        message = ""
+        if not item_created:
+            if cart_item.quantity < product.stock:
+                cart_item.quantity += 1
+                cart_item.save()
+                message = f"Kuantitas '{product.name}' di keranjang diperbarui menjadi {cart_item.quantity}."
+            else:
+                message = f"Stok maksimum untuk '{product.name}' telah tercapai."
+                return JsonResponse({'status': 'warning', 'message': message, 'product_name': product.name})
         else:
-            messages.warning(request, f"Stok maksimum untuk '{product.name}' telah tercapai.")
-    else:
-        messages.success(request, f"'{product.name}' telah ditambahkan ke keranjang Anda.")
+            message = f"'{product.name}' telah ditambahkan ke keranjang Anda."
 
+        return JsonResponse({'status': 'success', 'message': message, 'product_name': product.name})
+    
     return redirect('shop')
+
 
 @login_required
 def update_cart_item_quantity(request):
@@ -151,7 +180,6 @@ def update_cart_item_quantity(request):
 
             if new_quantity == 0:
                 cart_item.delete()
-                # Re-fetch the cart to ensure its items are updated and total is accurate
                 cart = get_object_or_404(Cart, user=request.user)
                 return JsonResponse({
                     'success': True,
@@ -187,6 +215,7 @@ def update_cart_item_quantity(request):
         except Product.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Produk tidak ditemukan.'}, status=404)
         except Exception as e:
+            print(f"Error in update_cart_item_quantity: {e}")
             return JsonResponse({'success': False, 'error': f'Terjadi kesalahan server: {str(e)}'}, status=500)
             
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
@@ -197,10 +226,15 @@ def remove_from_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     cart_item.delete()
     messages.info(request, "Item telah dihapus dari keranjang Anda.")
-    return redirect('cart') # Menggunakan nama URL 'cart'
+    return redirect('cart')
 
 @login_required
 def checkout_process(request):
+    """
+    Memproses finalisasi pesanan dari keranjang belanja pengguna.
+    Membuat objek Order, mengurangi stok, mengosongkan keranjang,
+    mengatur status 'Pending', dan membuat invoice PDF.
+    """
     cart = get_object_or_404(Cart, user=request.user)
     cart_items = cart.items.all()
 
@@ -211,7 +245,21 @@ def checkout_process(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                order = Order.objects.create(user=request.user)
+                # Hitung total_order_amount sebelum membuat Order
+                total_order_amount = sum(item.get_total_item_price() for item in cart_items)
+
+                order = Order.objects.create(
+                    user=request.user,
+                    first_name=request.user.first_name if request.user.first_name else '',
+                    last_name=request.user.last_name if request.user.last_name else '',
+                    email=request.user.email if request.user.email else '',
+                    phone_number='', # Pastikan ini diisi jika ada di User model atau dihapus jika tidak perlu
+                    shipping_address='N/A (No shipping address required)',
+                    payment_method='Direct Payment',
+                    total_amount=total_order_amount, # Set total_amount
+                    status='Pending' # Set status order menjadi 'Pending'
+                )
+                
                 for item in cart_items:
                     if item.product.stock >= item.quantity:
                         OrderItem.objects.create(
@@ -224,12 +272,31 @@ def checkout_process(request):
                         item.product.save()
                     else:
                         messages.error(request, f"Stok tidak mencukupi untuk '{item.product.name}'. Silakan sesuaikan kuantitas di keranjang.")
-                        raise Exception("Stok tidak mencukupi")
-                
-                cart_items.delete()
-                messages.success(request, f"Pesanan Anda (ID: {order.id}) telah berhasil dibuat!")
-                return redirect('my_account')
-        except Exception as e:
-            return redirect('cart') # Menggunakan nama URL 'cart'
+                        raise Exception(f"Stok tidak mencukupi untuk '{item.product.name}'")
             
-    return render(request, 'checkout.html', {'cart': cart, 'cart_items': cart_items})
+                cart_items.delete() # Kosongkan keranjang setelah order berhasil
+
+                # --- Bagian untuk membuat PDF Invoice ---
+                template = get_template('invoice.html') # Mengambil template invoice
+                context = {'order': order} # Data yang akan dikirim ke template
+                html = template.render(context) # Render template menjadi string HTML
+
+                # Membuat objek HTML dari string
+                pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf()
+
+                # Mengembalikan PDF sebagai HttpResponse
+                response = HttpResponse(pdf_file, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
+                
+                # Anda bisa juga menambahkan pesan sukses ke session jika ingin redirect ke halaman lain
+                messages.success(request, f"Pesanan Anda (ID: {order.id}) telah berhasil dibuat dan invoice diunduh!")
+                
+                return response # Mengembalikan PDF sebagai respons
+
+        except Exception as e:
+            print(f"Error during checkout_process: {e}")
+            messages.error(request, f"Gagal membuat pesanan: {str(e)}")
+            # Jika ada error, redirect ke halaman checkout atau cart
+            return redirect('checkout') # Atau JsonResponse jika menggunakan AJAX
+
+    return redirect('checkout') # Jika request bukan POST, redirect ke checkout

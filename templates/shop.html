@@ -2,18 +2,26 @@
 {% load static %}
 
 {% block content %}
-
     <div class="all-title-box">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
                     <h2>Shop</h2>
-                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="shop-box-inner">
         <div class="container">
+            {# Bagian untuk menampilkan notifikasi #}
+            <div id="add-to-cart-notification" class="alert alert-success mt-3" style="display: none;">
+                <span id="notification-message"></span>
+                {# Tombol "Lihat Keranjang" dihapus dari sini #}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
             <div class="row">
                 <div class="col-sm-12 col-xs-12 shop-content-right">
                     <div class="right-product-box">
@@ -35,7 +43,7 @@
                                     <li>
                                         <a class="nav-link active" href="#grid-view" data-toggle="tab"> <i class="fa fa-th"></i> </a>
                                     </li>
-                                    </ul>
+                                </ul>
                             </div>
                         </div>
 
@@ -43,7 +51,6 @@
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane fade show active" id="grid-view">
                                     <div class="row">
-                                        {# Loop melalui produk yang dikirim dari view shop (pastikan view Anda mengirimkan 'products') #}
                                         {% for product in products %}
                                         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
                                             <div class="products-single fix">
@@ -51,7 +58,7 @@
                                                     <div class="type-lb">
                                                         {% if product.stock == 0 %}
                                                             <p class="sold-out">Sold Out</p>
-                                                        {% elif product.price > 50 %} {# Contoh: Anda bisa menyesuaikan kondisi ini #}
+                                                        {% elif product.price > 50 %}
                                                             <p class="sale">Sale</p>
                                                         {% else %}
                                                             <p class="new">New</p>
@@ -59,23 +66,20 @@
                                                     </div>
                                                     <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/default_product.jpg' %}{% endif %}" class="img-fluid" alt="Image">
                                                     <div class="mask-icon">
-                                                        <ul>
-                                                            <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                                            <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                                            <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                                        </ul>
+                                                        
                                                         {# Form untuk tombol Add to Cart #}
-                                                        {% if user.is_authenticated %} {# Hanya tampilkan tombol jika pengguna login #}
+                                                        {% if user.is_authenticated %}
                                                             {% if product.stock > 0 %}
-                                                            <form action="{% url 'add_to_cart' product.id %}" method="post">
+                                                            <form class="add-to-cart-form" data-product-id="{{ product.id }}" method="post" action="{% url 'add_to_cart' product.id %}">
                                                                 {% csrf_token %}
+                                                                <input type="hidden" name="product_id" value="{{ product.id }}">
                                                                 <button type="submit" class="cart">Add to Cart</button>
                                                             </form>
                                                             {% else %}
                                                             <button type="button" class="cart disabled">Sold Out</button>
                                                             {% endif %}
                                                         {% else %}
-                                                            <a href="{% url 'login' %}" class="cart">Login to Add</a> {# Jika belum login, arahkan ke halaman login #}
+                                                            <a href="{% url 'login' %}" class="cart">Login to Add</a>
                                                         {% endif %}
                                                     </div>
                                                 </div>
@@ -89,11 +93,80 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {# Tombol "Lihat Keranjang" dipindahkan ke sini, di bagian bawah container #}
+            <div class="row my-5">
+                <div class="col-lg-12 text-center">
+                    <a href="{% url 'cart' %}" class="btn hvr-hover">Lihat Keranjang</a>
+                </div>
+            </div>
         </div>
     </div>
-    {% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+{# Pastikan Anda memuat jQuery, jika belum ada di template main.html atau base.html Anda #}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Fungsi untuk mendapatkan CSRF token dari cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Event listener untuk form Add to Cart
+    $('.add-to-cart-form').on('submit', function(e) {
+        e.preventDefault(); // Mencegah form disubmit secara tradisional (page reload)
+        
+        var $this = $(this);
+        var productId = $this.data('product-id');
+        var formData = $this.serialize(); // Ambil semua data form, termasuk csrf_token dan product_id
+
+        $.ajax({
+            url: $this.attr('action'), // Gunakan URL dari atribut 'action' form
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                let notificationDiv = $('#add-to-cart-notification');
+                let notificationMessage = $('#notification-message');
+
+                if (response.status === 'success') {
+                    notificationMessage.text('Pesanan "' + response.product_name + '" telah masuk ke dalam keranjang!');
+                    notificationDiv.removeClass('alert-warning').addClass('alert-success');
+                } else if (response.status === 'warning') {
+                    notificationMessage.text(response.message); // Pesan seperti "Stok maksimum telah tercapai"
+                    notificationDiv.removeClass('alert-success').addClass('alert-warning');
+                } else {
+                    notificationMessage.text('Terjadi kesalahan: ' + response.message);
+                    notificationDiv.removeClass('alert-success').addClass('alert-danger');
+                }
+                notificationDiv.fadeIn().delay(3000).fadeOut(); // Tampilkan notifikasi selama 3 detik
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                let notificationDiv = $('#add-to-cart-notification');
+                let notificationMessage = $('#notification-message');
+                notificationMessage.text('Terjadi kesalahan saat menambahkan produk ke keranjang.');
+                notificationDiv.removeClass('alert-success').addClass('alert-danger').fadeIn().delay(3000).fadeOut();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

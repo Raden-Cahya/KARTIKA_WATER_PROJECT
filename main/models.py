@@ -1,13 +1,13 @@
 # main/models.py
 from django.db import models
-from django.contrib.auth.models import User # Menggunakan User bawaan Django
+from django.contrib.auth.models import User
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='products/', blank=True, null=True) # Sudah benar
-    stock = models.IntegerField(default=0) # Jumlah stok produk
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    stock = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -20,7 +20,8 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def get_total_price(self):
-        # Menghitung total harga semua item di keranjang
+        # Mengambil total harga dari semua CartItem di keranjang ini
+        # Menggunakan .items.all() yang merupakan related_name dari ForeignKey di CartItem
         return sum(item.get_total_item_price() for item in self.items.all())
 
     def __str__(self):
@@ -33,21 +34,35 @@ class CartItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def get_total_item_price(self):
-        # Menghitung total harga untuk item tertentu
         return self.quantity * self.product.price
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} in {self.cart.user.username}'s cart"
 
-# Opsional: Model untuk Order (Pesanan) dan OrderItem (Item Pesanan)
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    
+    # Field informasi kontak (dibuat opsional)
+    first_name = models.CharField(max_length=100, blank=True, null=True)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+
+    # Field alamat pengiriman dan metode pembayaran (dibuat opsional)
+    shipping_address = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=50, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_completed = models.BooleanField(default=False) # Status pesanan
+    is_completed = models.BooleanField(default=False)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # --- TAMBAHAN BARU: Field status untuk Order ---
+    status = models.CharField(max_length=50, default='Pending') # Contoh: 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'
 
     def get_total_price(self):
-        return sum(item.get_total_item_price() for item in self.items.all())
+        # Ini mengembalikan total_amount yang sudah dihitung dan disimpan saat order dibuat
+        return self.total_amount
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"

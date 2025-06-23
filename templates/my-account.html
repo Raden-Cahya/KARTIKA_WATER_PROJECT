@@ -1,157 +1,151 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-<!-- Start About Page  -->
-<div class="about-box-main">
+<!-- Start My Account Page -->
+<div class="my-account-box-main">
     <div class="container">
         <div class="row">
+            {# Bagian informasi pengguna dan edit nomor telepon #}
             <div class="col-lg-6">
-                <div class="banner-frame"> <img class="img-fluid" src="{% static 'images/about-img.jpg' %}" alt="" />
+                <div class="profile-info">
+                    <h2 class="noo-sh-title-top">Informasi <span>Pengguna</span></h2>
+                    
+                    {# Menampilkan informasi dasar pengguna #}
+                    <p>Nama Pengguna: <strong>{{ user.username }}</strong></p>
+                    <p>No. Telepon Saat Ini: <strong>{% if user_profile.phone_number %}{{ user_profile.phone_number }}{% else %}Belum diisi{% endif %}</strong></p>
+
+                    <h3 class="mt-4">Perbarui Informasi Kontak</h3>
+                    {# Formulir untuk memperbarui profil, sekarang nama, email, dan nomor telepon dapat diedit #}
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {# Input Nama Depan (sekarang bisa diedit) #}
+                        <div class="form-group">
+                            <label for="id_first_name">Nama Depan:</label>
+                            <input type="text" id="id_first_name" name="first_name" class="form-control" value="{{ user.first_name|default:'' }}">
+                        </div>
+
+                        {# Input Nama Belakang (sekarang bisa diedit) #}
+                        <div class="form-group">
+                            <label for="id_last_name">Nama Belakang:</label>
+                            <input type="text" id="id_last_name" name="last_name" class="form-control" value="{{ user.last_name|default:'' }}">
+                        </div>
+
+                        {# Input Email (sekarang bisa diedit) #}
+                        <div class="form-group">
+                            <label for="id_email">Email:</label>
+                            <input type="email" id="id_email" name="email" class="form-control" value="{{ user.email|default:'' }}">
+                        </div>
+
+                        {# Input Nomor Telepon (editable) dari UserProfileForm #}
+                        <div class="form-group">
+                            <label for="{{ profile_form.phone_number.id_for_label }}">Nomor Telepon:</label>
+                            {{ profile_form.phone_number }}
+                            {% if profile_form.phone_number.errors %}
+                                <div class="text-danger">
+                                    {% for error in profile_form.phone_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn hvr-hover mt-3">Simpan Perubahan</button>
+                    </form>
                 </div>
             </div>
+            
+            {# Bagian riwayat transaksi (history pembelian) #}
             <div class="col-lg-6">
-                <h2 class="noo-sh-title-top">Nama <span>Pengguna:</span></h2>
-                <p>Raden Cahya Kartika Triadi Putra</p>
-                
-                <h2 class="noo-sh-title-top">Email<span>:</span></h2>
-                <p>radencahya@gmail.com</p>
-                
-                <h2 class="noo-sh-title-top">No <span>Hp:</span></h2>
-                <p>08765432123</p>
-                
-                <!-- <a class="btn hvr-hover" href="#">Read More</a> -->
+                <div class="order-history">
+                    <h2 class="noo-sh-title-top">Riwayat <span>Pesanan</span></h2>
+                    {% if orders %}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <th>Tanggal</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                                <td>Rp {{ order.total_amount|floatformat:0 }}</td>
+                                <td>{{ order.status }}</td>
+                                <td>
+                                    {# Tombol untuk melihat detail pesanan dalam modal #}
+                                    <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#orderDetailsModal-{{ order.id }}">Lihat Detail</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {# Modals untuk detail pesanan (muncul ketika tombol "Lihat Detail" diklik) #}
+                    {% for order in orders %}
+                    <div class="modal fade" id="orderDetailsModal-{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel-{{ order.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="orderDetailsModalLabel-{{ order.id }}">Detail Pesanan #{{ order.id }}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Tanggal Order:</strong> {{ order.created_at|date:"d M Y H:i" }</p>
+                                    <p><strong>Total Pesanan:</strong> Rp {{ order.total_amount|floatformat:0 }}</p>
+                                    <p><strong>Status:</strong> {{ order.status }}</p>
+                                    <hr>
+                                    <h6>Item Pesanan:</h6>
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Produk</th>
+                                                <th>Kuantitas</th>
+                                                <th>Harga Satuan</th>
+                                                <th>Subtotal Item</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order.items.all %}
+                                            <tr>
+                                                <td>{{ item.product.name }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>Rp {{ item.price|floatformat:0 }}</td>
+                                                <td>Rp {{ item.get_total_item_price|floatformat:0 }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <hr>
+                                    <h6>Informasi Pengiriman/Pembayaran (dari Order):</h6>
+                                    <p>Nama: {{ order.first_name }} {{ order.last_name }}</p>
+                                    <p>Email: {{ order.email }}</p>
+                                    <p>No. Telepon: {{ order.phone_number }}</p>
+                                    <p>Alamat Pengiriman: {{ order.shipping_address }}</p>
+                                    <p>Metode Pembayaran: {{ order.payment_method }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% else %}
+                        <p>Anda belum memiliki riwayat pesanan.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-        <!-- <div class="row my-5">
-            <div class="col-sm-6 col-lg-4">
-                <div class="service-block-inner">
-                    <h3>We are Trusted</h3>
-                    <p>We have become the trusted choice for many families in providing clean, high-quality drinking water. Your trust drives us to consistently maintain the highest standards in every service we offer. </p>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-                <div class="service-block-inner">
-                    <h3>We are Professional</h3>
-                    <p>With a structured system and experienced team, we deliver fast, on-time, and friendly service. Your comfort and satisfaction are always our top priority. </p>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-                <div class="service-block-inner">
-                    <h3>We are Expert</h3>
-                    <p>Backed by years of experience and deep knowledge in water distribution, we ensure that every product you receive has passed thorough quality checks for your peace of mind. </p>
-                </div>
-            </div>
-        </div> -->
-        <!-- <div class="row my-4">
-            <div class="col-12">
-                <h2 class="noo-sh-title">Meet Our Team</h2>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="hover-team">
-                    <div class="our-team"> <img src="images/img-1.jpg" alt="" />
-                        <div class="team-content">
-                            <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                        <ul class="social">
-                            <li>
-                                <a href="#" class="fab fa-facebook"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-twitter"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-google-plus"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-youtube"></a>
-                            </li>
-                        </ul>
-                        <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                    </div>
-                    <div class="team-description">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                    </div>
-                    <hr class="my-0"> </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="hover-team">
-                    <div class="our-team"> <img src="images/img-2.jpg" alt="" />
-                        <div class="team-content">
-                            <h3 class="title">Kristiana</h3> <span class="post">Web Developer</span> </div>
-                        <ul class="social">
-                            <li>
-                                <a href="#" class="fab fa-facebook"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-twitter"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-google-plus"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-youtube"></a>
-                            </li>
-                        </ul>
-                        <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                    </div>
-                    <div class="team-description">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                    </div>
-                    <hr class="my-0"> </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="hover-team">
-                    <div class="our-team"> <img src="images/img-3.jpg" alt="" />
-                        <div class="team-content">
-                            <h3 class="title">Steve Thomas</h3> <span class="post">Web Developer</span> </div>
-                        <ul class="social">
-                            <li>
-                                <a href="#" class="fab fa-facebook"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-twitter"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-google-plus"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-youtube"></a>
-                            </li>
-                        </ul>
-                        <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                    </div>
-                    <div class="team-description">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                    </div>
-                    <hr class="my-0"> </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-                <div class="hover-team">
-                    <div class="our-team"> <img src="images/img-1.jpg" alt="" />
-                        <div class="team-content">
-                            <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                        <ul class="social">
-                            <li>
-                                <a href="#" class="fab fa-facebook"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-twitter"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-google-plus"></a>
-                            </li>
-                            <li>
-                                <a href="#" class="fab fa-youtube"></a>
-                            </li>
-                        </ul>
-                        <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                    </div>
-                    <div class="team-description">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                    </div>
-                    <hr class="my-0"> </div>
-            </div>
-        </div> -->
     </div>
 </div>
-<!-- End About Page -->
+<!-- End My Account Page -->
 {% endblock %}
