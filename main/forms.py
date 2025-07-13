@@ -1,33 +1,31 @@
 # main/forms.py
 
 from django import forms
-from django.contrib.auth.models import User # Tetap butuh User untuk create_user
-from django.contrib.auth.forms import AuthenticationForm # Tetap gunakan ini untuk login
-# from .models import UserProfile # Hapus import ini
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
+from .models import UserProfile # Import UserProfile yang sudah ada di models.py
 
-class CustomUserCreationForm(forms.Form): # Meng-extend forms.Form
+class CustomUserCreationForm(forms.Form):
     username = forms.CharField(
         max_length=150,
         required=True,
         label="Nama Pengguna",
         help_text="Nama pengguna harus unik dan tidak terlalu panjang.",
-        widget=forms.TextInput(attrs={'placeholder': 'Masukkan nama pengguna Anda'})
+        widget=forms.TextInput(attrs={'placeholder': 'Masukkan nama pengguna Anda', 'class': 'form-control'})
     )
     email = forms.EmailField(
         required=True,
         label="Email",
-        widget=forms.EmailInput(attrs={'placeholder': 'Masukkan email pengguna Anda'})
+        widget=forms.EmailInput(attrs={'placeholder': 'Masukkan email pengguna Anda', 'class': 'form-control'})
     )
-    # no_hp DIHAPUS karena tidak ada lagi tempat untuk menyimpannya di User bawaan
 
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Masukkan kata sandi Anda'}),
+        widget=forms.PasswordInput(attrs={'placeholder': 'Masukkan kata sandi Anda', 'class': 'form-control'}),
         label="Kata Sandi",
         help_text="Kata sandi minimal 6 karakter. Tidak ada persyaratan khusus lainnya.",
         required=True
     )
 
-    # --- Validasi Kustom ---
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
@@ -50,9 +48,7 @@ class CustomUserCreationForm(forms.Form): # Meng-extend forms.Form
         username = self.cleaned_data['username']
         email = self.cleaned_data['email']
         password = self.cleaned_data['password']
-        # no_hp tidak lagi diambil dari cleaned_data
 
-        # Membuat user baru. UserProfile tidak terlibat lagi.
         user = User.objects.create_user(username=username, email=email, password=password)
 
         if commit:
@@ -62,3 +58,38 @@ class CustomUserCreationForm(forms.Form): # Meng-extend forms.Form
 class CustomAuthenticationForm(AuthenticationForm):
     # Tidak ada perubahan di sini
     pass
+
+# --- FORM BARU UNTUK MENGEDIT NAMA DEPAN/PELANGGAN PADA MODEL USER ---
+class UserUpdateForm(forms.ModelForm):
+    # Menggunakan first_name sebagai 'Nama Pelanggan'
+    first_name = forms.CharField(
+        max_length=150,
+        required=True,
+        label="Nama Pelanggan",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan Nama Pelanggan'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name'] # Hanya mengelola first_name
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Menghapus field yang tidak relevan agar tidak dirender atau diproses
+        if 'last_name' in self.fields:
+            del self.fields['last_name']
+        if 'email' in self.fields:
+            del self.fields['email']
+
+# --- FORM BARU UNTUK MENGEDIT NOMOR TELEPON PADA MODEL USERPROFILE ---
+class UserProfileForm(forms.ModelForm):
+    phone_number = forms.CharField(
+        max_length=20, # Sesuaikan dengan max_length di models.py
+        required=False, # Nomor telepon bisa kosong
+        label="Nomor Telepon",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contoh: 081234567890'})
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ['phone_number'] # Hanya mengelola phone_number

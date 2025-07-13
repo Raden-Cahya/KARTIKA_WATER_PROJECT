@@ -1,91 +1,112 @@
 {% load static %}
+
+{# Elemen ini bisa dipindahkan ke main.html jika ingin muncul di semua halaman #}
+<div class="floating-element"></div>
+<div class="floating-element"></div>
+<div class="floating-element"></div>
+
 <div class="main-top">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                <div class="login-box">
+        <div class="row justify-content-end">
+            <div class="col-lg-3">
+                <div class="login-box" style="width: fit-content; margin-left: auto;">
+                    {# Logika untuk menampilkan Login/Register atau Selamat Datang/Logout #}
                     {% if user.is_authenticated %}
-                        <select id="login-nav" class="form-control" onchange="location = this.value;" style="background-color: rgb(12, 79, 180); color: black;">
-                            <option value=""> Selamat datang, {{ user.username }}! </option>
-                            <option value="{% url 'my_account' %}">Akun Saya</option> {# <--- UBAH DI SINI #}
+                        <select id="login-nav" class="form-control" onchange="location = this.value;">
+                            <option value="">Selamat datang, {{ user.username }}!</option>
+                            <option value="{% url 'my_account' %}">Akun Saya</option>
                             <option value="{% url 'logout' %}">Logout</option>
                         </select>
                     {% else %}
-                        <select id="login-nav" class="form-control" onchange="location = this.value;" style="background-color: rgb(12, 79, 180); color: black;">
-                            <option value="">    Pilih Aksi    </option>
-                            <option value="{% url 'register' %}">Register Here</option>
-                            <option value="{% url 'login' %}">Sign In</option>
+                        <select id="login-nav" class="form-control" onchange="location = this.value;">
+                            <option value="">Guest</option>
+                            <option value="{% url 'login_page' %}">Login</option>
+                            <option value="{% url 'register' %}">Register</option>
                         </select>
                     {% endif %}
-                </div>
-                <div class="text-slid-box">
-                    <div id="offer-box" class="carouselTicker">
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <header class="main-header">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-default bootsnav">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-default">
         <div class="container">
             <div class="navbar-header">
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbars-rs-food" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fa fa-bars"></i>
-            </button>
-                <a class="navbar-brand" href="{% url 'index' %}"><img src="{% static 'images/logo.png' %}" class="logo" alt=""></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="{% url 'index' %}">
+                    <img src="{% static 'images/logo.png' %}" class="logo" alt="Kartika Water">
+                </a>
             </div>
             <div class="collapse navbar-collapse" id="navbar-menu">
-                <ul class="nav navbar-nav ml-auto" data-in="fadeInDown" data-out="fadeOutUp">
-                    <li class="nav-item active"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About Us</a></li>
-                    
-                    {% if user.is_authenticated %}
-                    <li class="dropdown">
-                        <a href="#" class="nav-link dropdown-toggle arrow" data-toggle="dropdown">SHOP</a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'shop' %}">Shop</a></li>
-                            <li><a href="{% url 'cart' %}">Cart</a></li>
-                            <li><a href="{% url 'checkout' %}">Checkout</a></li>
-                        </ul>
+                <ul class="nav navbar-nav ms-auto">
+                    {# Navigasi Home #}
+                    <li class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'index' %}">Home</a>
                     </li>
-                    {% endif %}
-
+                    {# Navigasi About Us #}
+                    <li class="nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'about' %}">About Us</a>
+                    </li>
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'my_account' %}">My Account</a></li> {# <--- UBAH DI SINI #}
+                        {# Navigasi Shop (Dropdown) - Hanya tampil jika user login #}
+                        <li class="nav-item dropdown {% if request.resolver_match.url_name == 'shop' or request.resolver_match.url_name == 'cart' or request.resolver_match.url_name == 'checkout' %}active{% endif %}">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">SHOP</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'shop' %}" class="dropdown-item">Shop</a></li>
+                                <li><a href="{% url 'cart' %}" class="dropdown-item">Cart</a></li>
+                                <li><a href="{% url 'checkout' %}" class="dropdown-item">Checkout</a></li>
+                            </ul>
+                        </li>
+                        {# Navigasi My Account - Hanya tampil jika user login #}
+                        <li class="nav-item {% if request.resolver_match.url_name == 'my_account' %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'my_account' %}">My Account</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
-
-        </div> {# <-- DIV PENUTUP UNTUK CONTAINER NAV #}
-        
-        <div class="side">
-            <a href="#" class="close-side"><i class="fa fa-times"></i></a>
-            <li class="cart-box">
-                <ul class="cart-list">
-                    <li>
-                        <a href="#" class="photo"><img src="{% static 'images/img-pro-01.jpg' %}" class="cart-thumb" alt="" /></a>
-                        <h6><a href="#">Delica omtantur </a></h6>
-                        <p>1x - <span class="price">$80.00</span></p>
-                    </li>
-                    <li>
-                        <a href="#" class="photo"><img src="{% static 'images/img-pro-02.jpg' %}" class="cart-thumb" alt="" /></a>
-                        <h6><a href="#">Omnes ocurreret</a></h6>
-                        <p>1x - <span class="price">$60.00</span></p>
-                    </li>
-                    <li>
-                        <a href="#" class="photo"><img src="{% static 'images/img-pro-03.jpg' %}" class="cart-thumb" alt="" /></a>
-                        <h6><a href="#">Agam facilisis</a></h6>
-                        <p>1x - <span class="price">$40.00</span></p>
-                    </li>
-                    <li class="total">
-                        <a href="#" class="btn btn-default hvr-hover btn-cart">VIEW CART</a>
-                        <span class="float-right"><strong>Total</strong>: $180.00</span>
-                    </li>
-                </ul>
-            </li>
         </div>
     </nav>
 </header>
+
+<div class="side" id="side-cart">
+    <a href="#" class="close-side" onclick="closeSideCart()"><i class="fa fa-times"></i></a>
+    <div class="cart-box">
+        <ul class="cart-list">
+            <li>
+                <a href="#" class="photo">
+                    <img src="https://via.placeholder.com/60x60/87CEEB/FFFFFF?text=P1" class="cart-thumb" alt="Product 1">
+                </a>
+                <div>
+                    <h6><a href="#">Air Galon 19L</a></h6>
+                    <p>1x - <span class="price">Rp 15.000</span></p>
+                </div>
+            </li>
+            <li>
+                <a href="#" class="photo">
+                    <img src="https://via.placeholder.com/60x60/87CEEB/FFFFFF?text=P2" class="cart-thumb" alt="Product 2">
+                </a>
+                <div>
+                    <h6><a href="#">Air Kemasan 600ml</a></h6>
+                    <p>6x - <span class="price">Rp 18.000</span></p>
+                    </div>
+                </li>
+                <li>
+                    <a href="#" class="photo">
+                        <img src="https://via.placeholder.com/60x60/87CEEB/FFFFFF?text=P3" class="cart-thumb" alt="Product 3">
+                    </a>
+                    <div>
+                        <h6><a href="#">Air Kemasan 1500ml</a></h6>
+                        <p>4x - <span class="price">Rp 24.000</span></p>
+                    </div>
+                </li>
+                <li class="total">
+                    <a href="#" class="btn btn-cart">VIEW CART</a>
+                    <span class="float-end mt-2"><strong>Total</strong>: Rp 57.000</span>
+                </li>
+            </ul>
+    </div>
+</div>

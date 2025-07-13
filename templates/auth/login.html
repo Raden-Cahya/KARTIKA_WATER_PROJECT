@@ -1,0 +1,59 @@
+{% extends "base_auth.html" %} {# Mengubah dari main.html ke base_auth.html #}
+{% load static %}
+
+{# Ini akan menambahkan kelas 'login-page-body' ke tag <body> di base_auth.html #}
+{% block body_class %}login-page-body{% endblock %}
+
+{% block content %}
+    {# Floating decorative elements - ini bisa diletakkan di main.html jika ingin muncul di semua halaman #}
+    {# atau biarkan di sini jika hanya untuk halaman login/register #}
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    
+    <!-- Water drop effects -->
+    <div class="water-drop"></div>
+    <div class="water-drop"></div>
+    <div class="water-drop"></div>
+    <div class="water-drop"></div>
+
+    <div class="login-container">
+        <div class="header">
+            <div class="logo-galon"></div>
+            <h2>Selamat Datang di Kartika Water</h2>
+            <p class="subtitle">Masuk ke akun Anda</p>
+            <div class="underline"></div>
+        </div>
+
+        {# Menampilkan pesan dari Django messages framework #}
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form action="{% url 'login_page' %}" method="POST"> {# Menggunakan 'login_page' sesuai nama URL di urls.py #}
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="username">Nama Pengguna</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" placeholder="Masukkan nama pengguna Anda" required>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="password">Kata Sandi</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Masukkan kata sandi Anda" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">Masuk Sekarang</button>
+        </form>
+
+        <div class="register-link">
+            Belum punya akun? <a href="{% url 'register' %}">Daftar di sini</a>
+        </div>
+    </div>
+{% endblock content %}

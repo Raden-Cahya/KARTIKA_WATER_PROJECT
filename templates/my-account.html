@@ -1,151 +1,773 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-<!-- Start My Account Page -->
-<div class="my-account-box-main">
-    <div class="container">
-        <div class="row">
-            {# Bagian informasi pengguna dan edit nomor telepon #}
-            <div class="col-lg-6">
-                <div class="profile-info">
-                    <h2 class="noo-sh-title-top">Informasi <span>Pengguna</span></h2>
-                    
-                    {# Menampilkan informasi dasar pengguna #}
-                    <p>Nama Pengguna: <strong>{{ user.username }}</strong></p>
-                    <p>No. Telepon Saat Ini: <strong>{% if user_profile.phone_number %}{{ user_profile.phone_number }}{% else %}Belum diisi{% endif %}</strong></p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Tema Biru Muda</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-                    <h3 class="mt-4">Perbarui Informasi Kontak</h3>
-                    {# Formulir untuk memperbarui profil, sekarang nama, email, dan nomor telepon dapat diedit #}
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        {# Input Nama Depan (sekarang bisa diedit) #}
-                        <div class="form-group">
-                            <label for="id_first_name">Nama Depan:</label>
-                            <input type="text" id="id_first_name" name="first_name" class="form-control" value="{{ user.first_name|default:'' }}">
-                        </div>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 25%, #E0F6FF 50%, #87CEEB 75%, #4682B4 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-                        {# Input Nama Belakang (sekarang bisa diedit) #}
-                        <div class="form-group">
-                            <label for="id_last_name">Nama Belakang:</label>
-                            <input type="text" id="id_last_name" name="last_name" class="form-control" value="{{ user.last_name|default:'' }}">
-                        </div>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-                        {# Input Email (sekarang bisa diedit) #}
-                        <div class="form-group">
-                            <label for="id_email">Email:</label>
-                            <input type="email" id="id_email" name="email" class="form-control" value="{{ user.email|default:'' }}">
-                        </div>
+        /* Floating Animation Elements */
+        .floating-element {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: float 20s infinite linear;
+            z-index: 0;
+        }
 
-                        {# Input Nomor Telepon (editable) dari UserProfileForm #}
-                        <div class="form-group">
-                            <label for="{{ profile_form.phone_number.id_for_label }}">Nomor Telepon:</label>
-                            {{ profile_form.phone_number }}
-                            {% if profile_form.phone_number.errors %}
-                                <div class="text-danger">
-                                    {% for error in profile_form.phone_number.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
 
-                        <button type="submit" class="btn hvr-hover mt-3">Simpan Perubahan</button>
-                    </form>
-                </div>
-            </div>
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            right: 10%;
+            animation-delay: -5s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 10%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(0px) rotate(180deg); }
+            75% { transform: translateY(-10px) rotate(270deg); }
+        }
+
+        .my-account-box-main {
+            position: relative;
+            z-index: 1;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .col-lg-6 {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* Profile Info Card */
+        .profile-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-info::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .profile-info:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .profile-info:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Order History Card */
+        .order-history {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-history::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .order-history:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .order-history:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Title Styling */
+        .noo-sh-title-top {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .noo-sh-title-top span {
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .noo-sh-title-top::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            border-radius: 2px;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0.5; transform: translateX(-50%) scaleX(0.8); }
+            50% { opacity: 1; transform: translateX(-50%) scaleX(1.2); }
+            100% { opacity: 0.5; transform: translateX(-50%) scaleX(0.8); }
+        }
+
+        /* Profile Info Text */
+        .profile-info p {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-info p strong {
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .profile-info h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: #2c3e50;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #4682B4;
+            box-shadow: 0 0 20px rgba(70, 130, 180, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(44, 62, 80, 0.6);
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(70, 130, 180, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(70, 130, 180, 0.4);
+            background: linear-gradient(45deg, #5a9bd4, #a2d5f2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .hvr-hover {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Table Styling */
+        .table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th {
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            border: none;
+        }
+
+        .table td {
+            padding: 12px 10px;
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #17a2b8, #20c997);
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 10px;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-dialog {
+            max-width: 800px;
+            width: 90%;
+            margin: 20px;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: #2c3e50;
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .modal-body h6 {
+            color: #4682B4;
+            font-size: 1.2rem;
+            margin: 20px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .modal-body hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            margin: 20px 0;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: rgba(248, 249, 250, 0.5);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #8e9ba7);
+        }
+
+        /* Error Messages */
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
             
-            {# Bagian riwayat transaksi (history pembelian) #}
-            <div class="col-lg-6">
-                <div class="order-history">
-                    <h2 class="noo-sh-title-top">Riwayat <span>Pesanan</span></h2>
-                    {% if orders %}
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID Pesanan</th>
-                                <th>Tanggal</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
-                            <tr>
-                                <td>{{ order.id }}</td>
-                                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
-                                <td>Rp {{ order.total_amount|floatformat:0 }}</td>
-                                <td>{{ order.status }}</td>
-                                <td>
-                                    {# Tombol untuk melihat detail pesanan dalam modal #}
-                                    <a href="#" class="btn btn-sm btn-info" data-toggle="modal" data-target="#orderDetailsModal-{{ order.id }}">Lihat Detail</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            .col-lg-6 {
+                width: 100%;
+            }
+            
+            .noo-sh-title-top {
+                font-size: 1.8rem;
+            }
+            
+            .profile-info, .order-history {
+                padding: 20px;
+            }
+            
+            .table {
+                font-size: 0.9rem;
+            }
+            
+            .modal-dialog {
+                width: 95%;
+                margin: 10px;
+            }
+        }
 
-                    {# Modals untuk detail pesanan (muncul ketika tombol "Lihat Detail" diklik) #}
-                    {% for order in orders %}
-                    <div class="modal fade" id="orderDetailsModal-{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="orderDetailsModalLabel-{{ order.id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="orderDetailsModalLabel-{{ order.id }}">Detail Pesanan #{{ order.id }}</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>Tanggal Order:</strong> {{ order.created_at|date:"d M Y H:i" }</p>
-                                    <p><strong>Total Pesanan:</strong> Rp {{ order.total_amount|floatformat:0 }}</p>
-                                    <p><strong>Status:</strong> {{ order.status }}</p>
-                                    <hr>
-                                    <h6>Item Pesanan:</h6>
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Produk</th>
-                                                <th>Kuantitas</th>
-                                                <th>Harga Satuan</th>
-                                                <th>Subtotal Item</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in order.items.all %}
-                                            <tr>
-                                                <td>{{ item.product.name }}</td>
-                                                <td>{{ item.quantity }}</td>
-                                                <td>Rp {{ item.price|floatformat:0 }}</td>
-                                                <td>Rp {{ item.get_total_item_price|floatformat:0 }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                    <hr>
-                                    <h6>Informasi Pengiriman/Pembayaran (dari Order):</h6>
-                                    <p>Nama: {{ order.first_name }} {{ order.last_name }}</p>
-                                    <p>Email: {{ order.email }}</p>
-                                    <p>No. Telepon: {{ order.phone_number }}</p>
-                                    <p>Alamat Pengiriman: {{ order.shipping_address }}</p>
-                                    <p>Metode Pembayaran: {{ order.payment_method }}</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                                </div>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #4682B4, #87CEEB);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #5a9bd4, #a2d5f2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Elements -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <!-- Start My Account Page -->
+    <div class="my-account-box-main">
+        <div class="container">
+            <div class="row">
+                <!-- Bagian informasi pengguna dan form edit -->
+                <div class="col-lg-6">
+                    <div class="profile-info">
+                        <h2 class="noo-sh-title-top">Informasi <span>Akun</span></h2>
+                        
+                        <!-- Menampilkan informasi dasar pengguna -->
+                        <p><i class="fas fa-user"></i> Nama Akun: <strong>john_doe</strong></p>
+                        <p><i class="fas fa-envelope"></i> Email: <strong>john@example.com</strong></p>
+                        <p><i class="fas fa-phone"></i> No. Telepon Saat Ini: <strong>+62 812 3456 7890</strong></p>
+
+                        <h3 class="mt-4"><i class="fas fa-edit"></i> Perbarui Informasi Kontak</h3>
+                        <!-- Formulir untuk memperbarui profil -->
+                        <form method="post">
+                            <!-- Input Nama Pelanggan -->
+                            <div class="form-group">
+                                <label for="id_first_name">Nama Pelanggan:</label>
+                                <input type="text" id="id_first_name" name="first_name" value="John" placeholder="Masukkan nama lengkap">
                             </div>
-                        </div>
-                    </div>
-                    {% endfor %}
 
-                    {% else %}
-                        <p>Anda belum memiliki riwayat pesanan.</p>
-                    {% endif %}
+                            <!-- Input Nomor Telepon -->
+                            <div class="form-group">
+                                <label for="id_phone_number">Nomor Telepon:</label>
+                                <input type="tel" id="id_phone_number" name="phone_number" value="+62 812 3456 7890" placeholder="Masukkan nomor telepon">
+                            </div>
+
+                            <button type="submit" class="btn hvr-hover mt-3">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Bagian riwayat transaksi -->
+                <div class="col-lg-6">
+                    <div class="order-history">
+                        <h2 class="noo-sh-title-top">Riwayat <span>Pesanan</span></h2>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID Pesanan</th>
+                                    <th>Tanggal</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#001</td>
+                                    <td>15 Jun 2024 14:30</td>
+                                    <td>Rp 450.000</td>
+                                    <td><span style="color: #28a745; font-weight: bold;">Selesai</span></td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info" onclick="showModal('orderDetailsModal-1')">
+                                            <i class="fas fa-eye"></i> Lihat Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#002</td>
+                                    <td>20 Jun 2024 10:15</td>
+                                    <td>Rp 280.000</td>
+                                    <td><span style="color: #ffc107; font-weight: bold;">Proses</span></td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info" onclick="showModal('orderDetailsModal-2')">
+                                            <i class="fas fa-eye"></i> Lihat Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#003</td>
+                                    <td>25 Jun 2024 16:45</td>
+                                    <td>Rp 675.000</td>
+                                    <td><span style="color: #17a2b8; font-weight: bold;">Dikirim</span></td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info" onclick="showModal('orderDetailsModal-3')">
+                                            <i class="fas fa-eye"></i> Lihat Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- End My Account Page -->
+
+    <!-- Modal for Order Details -->
+    <div class="modal" id="orderDetailsModal-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Pesanan #001</h5>
+                    <button type="button" class="close" onclick="hideModal('orderDetailsModal-1')">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Tanggal Order:</strong> 15 Jun 2024 14:30</p>
+                    <p><strong>Total Pesanan:</strong> Rp 450.000</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">Selesai</span></p>
+                    <hr>
+                    <h6><i class="fas fa-shopping-cart"></i> Item Pesanan:</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Kuantitas</th>
+                                <th>Harga Satuan</th>
+                                <th>Subtotal Item</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Laptop Gaming</td>
+                                <td>1</td>
+                                <td>Rp 400.000</td>
+                                <td>Rp 400.000</td>
+                            </tr>
+                            <tr>
+                                <td>Mouse Wireless</td>
+                                <td>1</td>
+                                <td>Rp 50.000</td>
+                                <td>Rp 50.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <h6><i class="fas fa-shipping-fast"></i> Informasi Pengiriman/Pembayaran:</h6>
+                    <p><strong>Nama Pelanggan:</strong> John Doe</p>
+                    <p><strong>Email:</strong> john@example.com</p>
+                    <p><strong>Telepon:</strong> +62 812 3456 7890</p>
+                    <p><strong>Alamat Pengiriman:</strong> Jl. Sudirman No. 123, Jakarta Pusat</p>
+                    <p><strong>Metode Pembayaran:</strong> Transfer Bank</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('orderDetailsModal-1')">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Modals (Modal 2 and 3) would be similar to Modal 1 -->
+    <div class="modal" id="orderDetailsModal-2">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Pesanan #002</h5>
+                    <button type="button" class="close" onclick="hideModal('orderDetailsModal-2')">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Tanggal Order:</strong> 20 Jun 2024 10:15</p>
+                    <p><strong>Total Pesanan:</strong> Rp 280.000</p>
+                    <p><strong>Status:</strong> <span style="color: #ffc107; font-weight: bold;">Proses</span></p>
+                    <hr>
+                    <h6><i class="fas fa-shopping-cart"></i> Item Pesanan:</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Kuantitas</th>
+                                <th>Harga Satuan</th>
+                                <th>Subtotal Item</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Headset Gaming</td>
+                                <td>1</td>
+                                <td>Rp 200.000</td>
+                                <td>Rp 200.000</td>
+                            </tr>
+                            <tr>
+                                <td>Keyboard Mechanical</td>
+                                <td>1</td>
+                                <td>Rp 80.000</td>
+                                <td>Rp 80.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <h6><i class="fas fa-shipping-fast"></i> Informasi Pengiriman/Pembayaran:</h6>
+                    <p><strong>Nama Pelanggan:</strong> John Doe</p>
+                    <p><strong>Email:</strong> john@example.com</p>
+                    <p><strong>Telepon:</strong> +62 812 3456 7890</p>
+                    <p><strong>Alamat Pengiriman:</strong> Jl. Sudirman No. 123, Jakarta Pusat</p>
+                    <p><strong>Metode Pembayaran:</strong> E-Wallet</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('orderDetailsModal-2')">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        });
+
+        // Add form submission animation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const button = this.querySelector('button[type="submit"]');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            
+            setTimeout(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Berhasil Disimpan!';
+                button.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+                    button.style.background = 'linear-gradient(45deg, #4682B4, #87CEEB)';
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
 {% endblock %}

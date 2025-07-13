@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Kartika Water - Solusi Air Minum Anda</title>
+    <title>{% block title %}Kartika Water{% endblock %}</title>
     <meta name="keywords" content="kartika water, air minum, galon, air kemasan, pesan air online">
     <meta name="description" content="Kartika Water menyediakan layanan distribusi air minum berkualitas untuk kebutuhan keluarga Anda. Pesan online, antar cepat.">
     <meta name="author" content="Kartika Water Team">
@@ -16,17 +16,14 @@
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
 
-    <!-- Bootstrap CSS (Pastikan versi 5.3.0) -->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Local CSS files -->
-    {# style.css sekarang berisi semua gaya, termasuk dari custom_styles.css yang dihapus #}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {# Jika Anda memiliki gaya responsif terpisah, pertahankan #}
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
-    {# Jika Anda memiliki custom.css terpisah untuk hal lain, pertahankan #}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
     <!--[if lt IE 9]>
@@ -42,22 +39,12 @@
 
 {# Tambahkan block untuk class body agar bisa di-override oleh child templates #}
 <body class="{% block body_class %}{% endblock %}">
-    <!-- Start Main Top -->
-    {% include "partials/header.html" %}
-    <!-- End Main Top -->
-
+    {# Tidak ada header atau footer di sini. Hanya konten utama. #}
     {% block content %}
     {# Konten spesifik halaman akan ditempatkan di sini #}
     {% endblock %}
 
-    <!-- Start Footer -->
-    {% include "partials/footer.html" %}
-    <!-- End Footer -->
-
-    <a href="#" id="back-to-top" title="Back to top" style="display: none;">&uarr;</a>
-
     <!-- ALL JS FILES -->
-    {# Gunakan CDN terbaru untuk jQuery, Popper, dan Bootstrap jika memungkinkan #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -73,8 +60,6 @@
     <script src="{% static 'js/baguetteBox.min.js' %}"></script>
     <script src="{% static 'js/form-validator.min.js' %}"></script>
     <script src="{% static 'js/contact-form-script.js' %}"></script>
-    
-    {# custom.js akan berisi JS kustom Anda #}
     <script src="{% static 'js/custom.js' %}"></script>
 
     {% block extra_js %}

@@ -1,153 +1,435 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-<!-- Start About Page  -->
-    <div class="about-box-main">
-        <div class="container">
-            <div class="row">
-				<div class="col-lg-6">
-                    <div class="banner-frame"> <img class="img-fluid" src="{% static 'images/about-img.jpg' %}" alt="" />
-                    </div>
+<style>
+    /* Custom styles for About page */
+    .about-box-main {
+        background: linear-gradient(135deg, #F0F8FF 0%, #E0F6FF 50%, #F8FDFF 100%);
+        min-height: 100vh;
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-box-main::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(135, 206, 235, 0.05) 0%, transparent 70%);
+        animation: floatBg 20s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    .about-box-main::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(173, 216, 230, 0.05) 0%, transparent 70%);
+        animation: floatBg 25s ease-in-out infinite reverse;
+        z-index: 1;
+    }
+
+    @keyframes floatBg {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    .container {
+        position: relative;
+        z-index: 2;
+    }
+
+    .banner-frame {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 
+            0 20px 40px rgba(135, 206, 235, 0.2),
+            0 10px 25px rgba(0, 0, 0, 0.1);
+        transform: perspective(1000px) rotateY(-5deg);
+        transition: all 0.5s ease;
+        background: linear-gradient(145deg, #ffffff, #f0f8ff);
+        padding: 10px;
+    }
+
+    .banner-frame:hover {
+        transform: perspective(1000px) rotateY(0deg) translateY(-10px);
+        box-shadow: 
+            0 30px 60px rgba(135, 206, 235, 0.3),
+            0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .banner-frame img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        transition: transform 0.5s ease;
+    }
+
+    .banner-frame:hover img {
+        transform: scale(1.05);
+    }
+
+    .banner-frame::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(135, 206, 235, 0.1), transparent);
+        border-radius: 20px;
+        pointer-events: none;
+    }
+
+    .noo-sh-title-top {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #4682B4;
+        margin-bottom: 30px;
+        position: relative;
+        text-shadow: 0 4px 8px rgba(70, 130, 180, 0.1);
+        animation: slideInRight 1s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .noo-sh-title-top span {
+        background: linear-gradient(135deg, #87CEEB, #4682B4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+    }
+
+    .noo-sh-title-top span::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, #87CEEB, #4682B4);
+        border-radius: 2px;
+        animation: expandLine 1s ease-out 0.5s both;
+    }
+
+    @keyframes expandLine {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    .about-content p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #4682B4;
+        margin-bottom: 20px;
+        text-align: justify;
+        opacity: 0;
+        animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    .about-content p:nth-child(2) { animation-delay: 0.4s; }
+    .about-content p:nth-child(3) { animation-delay: 0.5s; }
+    .about-content p:nth-child(4) { animation-delay: 0.6s; }
+    .about-content p:nth-child(5) { animation-delay: 0.7s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .about-content p:first-of-type {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #87CEEB;
+        margin-bottom: 25px;
+    }
+
+    .service-block-inner {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 40px 30px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            0 15px 35px rgba(135, 206, 235, 0.15),
+            0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.5s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transform: translateY(50px);
+        opacity: 0;
+        animation: slideInUp 0.8s ease-out both;
+    }
+
+    .service-block-inner:nth-child(1) { animation-delay: 0.8s; }
+    .service-block-inner:nth-child(2) { animation-delay: 1s; }
+    .service-block-inner:nth-child(3) { animation-delay: 1.2s; }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .service-block-inner:hover {
+        transform: translateY(-10px);
+        box-shadow: 
+            0 25px 50px rgba(135, 206, 235, 0.25),
+            0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .service-block-inner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #87CEEB, #4682B4);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .service-block-inner::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(135, 206, 235, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+
+    .service-block-inner:hover::after {
+        opacity: 1;
+    }
+
+    .service-block-inner h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #4682B4;
+        margin-bottom: 20px;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .service-block-inner h3::before {
+        content: '';
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #87CEEB, #4682B4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+        box-shadow: 0 8px 20px rgba(135, 206, 235, 0.3);
+    }
+
+    .service-block-inner:nth-child(1) h3::before { content: '🛡️'; }
+    .service-block-inner:nth-child(2) h3::before { content: '👔'; }
+    .service-block-inner:nth-child(3) h3::before { content: '🎯'; }
+
+    .service-block-inner p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #666;
+        margin-top: 25px;
+        text-align: justify;
+    }
+
+    /* Floating elements */
+    .floating-water {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(135, 206, 235, 0.2);
+        border-radius: 50%;
+        animation: floatWater 6s infinite ease-in-out;
+        z-index: 1;
+    }
+
+    .floating-water:nth-child(1) {
+        top: 10%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+
+    .floating-water:nth-child(2) {
+        top: 20%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .floating-water:nth-child(3) {
+        bottom: 30%;
+        left: 8%;
+        animation-delay: 4s;
+    }
+
+    .floating-water:nth-child(4) {
+        bottom: 15%;
+        right: 5%;
+        animation-delay: 1s;
+    }
+
+    @keyframes floatWater {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translateY(-20px) scale(1.2);
+            opacity: 1;
+        }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .noo-sh-title-top {
+            font-size: 2.2rem;
+        }
+        
+        .banner-frame {
+            transform: none;
+            margin-bottom: 40px;
+        }
+        
+        .service-block-inner {
+            margin-bottom: 25px;
+        }
+        
+        .about-content p {
+            font-size: 1rem;
+        }
+    }
+
+    /* Water ripple effect */
+    .water-ripple {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border: 2px solid rgba(135, 206, 235, 0.3);
+        border-radius: 50%;
+        animation: ripple 4s infinite;
+        z-index: 1;
+    }
+
+    .water-ripple:nth-child(1) {
+        top: 25%;
+        left: 15%;
+        animation-delay: 0s;
+    }
+
+    .water-ripple:nth-child(2) {
+        bottom: 35%;
+        right: 20%;
+        animation-delay: 2s;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+</style>
+
+<!-- Floating decorative elements -->
+<div class="floating-water"></div>
+<div class="floating-water"></div>
+<div class="floating-water"></div>
+<div class="floating-water"></div>
+
+<!-- Water ripple effects -->
+<div class="water-ripple"></div>
+<div class="water-ripple"></div>
+
+<!-- Start About Page -->
+<div class="about-box-main">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="banner-frame">
+                    <img class="img-fluid" src="{% static 'images/about-img.jpg' %}" alt="Kartika Water - Fresh Water Solution" />
                 </div>
-                <div class="col-lg-6">
+            </div>
+            <div class="col-lg-6">
+                <div class="about-content">
                     <h2 class="noo-sh-title-top">We are <span>Fresh water</span></h2>
                     <p>Kartika Water, Your Family's Clean Water Solution</p>
                     <p>"Kartika Water is a high-quality drinking water distribution service designed to meet your daily needs easily, quickly, and reliably. We offer a variety of products, including refillable gallons and bottled water in 1500ml, 600ml, and 400ml sizes – all available for convenient ordering through our website.</p>
                     <p>We believe that access to clean water is a basic right. Through the digitalization of our sales system, we aim to deliver better service and a seamless shopping experience—right from your phone or computer.</p>
                     <p>With Kartika Water, enjoy comfort in every drop.</p>
-					<!-- <a class="btn hvr-hover" href="#">Read More</a> -->
                 </div>
             </div>
-            <div class="row my-5">
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Trusted</h3>
-                        <p>We have become the trusted choice for many families in providing clean, high-quality drinking water. Your trust drives us to consistently maintain the highest standards in every service we offer. </p>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Professional</h3>
-                        <p>With a structured system and experienced team, we deliver fast, on-time, and friendly service. Your comfort and satisfaction are always our top priority. </p>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Expert</h3>
-                        <p>Backed by years of experience and deep knowledge in water distribution, we ensure that every product you receive has passed thorough quality checks for your peace of mind. </p>
-                    </div>
+        </div>
+        
+        <div class="row my-5">
+            <div class="col-sm-6 col-lg-4">
+                <div class="service-block-inner">
+                    <h3>We are Trusted</h3>
+                    <p>We have become the trusted choice for many families in providing clean, high-quality drinking water. Your trust drives us to consistently maintain the highest standards in every service we offer.</p>
                 </div>
             </div>
-            <!-- <div class="row my-4">
-                <div class="col-12">
-                    <h2 class="noo-sh-title">Meet Our Team</h2>
+            <div class="col-sm-6 col-lg-4">
+                <div class="service-block-inner">
+                    <h3>We are Professional</h3>
+                    <p>With a structured system and experienced team, we deliver fast, on-time, and friendly service. Your comfort and satisfaction are always our top priority.</p>
                 </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="images/img-1.jpg" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="service-block-inner">
+                    <h3>We are Expert</h3>
+                    <p>Backed by years of experience and deep knowledge in water distribution, we ensure that every product you receive has passed thorough quality checks for your peace of mind.</p>
                 </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="images/img-2.jpg" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Kristiana</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="images/img-3.jpg" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Steve Thomas</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="images/img-1.jpg" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-            </div> -->
+            </div>
         </div>
     </div>
-    <!-- End About Page -->
+</div>
+<!-- End About Page -->
+
 {% endblock %}

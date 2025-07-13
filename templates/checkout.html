@@ -2,12 +2,459 @@
 {% load static %}
 
 {% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Modern Design</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 25%, #E0F6FF 50%, #F0F8FF 75%, #87CEEB 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 30%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(176, 224, 230, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(240, 248, 255, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* Floating decorative elements */
+        .floating-element {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: floatUp 15s infinite ease-in-out;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, rgba(135, 206, 235, 0.3), rgba(176, 224, 230, 0.3));
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, rgba(176, 224, 230, 0.3), rgba(240, 248, 255, 0.3));
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(240, 248, 255, 0.3), rgba(135, 206, 235, 0.3));
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+        }
+
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Title Box */
+        .all-title-box {
+            background: linear-gradient(135deg, #4682B4 0%, #87CEEB 50%, #B0E0E6 100%);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .all-title-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,0 1000,100 0,80"/></svg>');
+            background-size: cover;
+        }
+
+        .all-title-box h2 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+            to { text-shadow: 0 4px 20px rgba(255,255,255,0.5); }
+        }
+
+        /* Main checkout container */
+        .checkout-box-main {
+            padding: 60px 0;
+            position: relative;
+        }
+
+        /* Login section for returning customers */
+        .new-account-login {
+            margin-bottom: 40px;
+        }
+
+        .new-account-login .title-left h3 {
+            color: #4682B4;
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .new-account-login .title-left h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, #4682B4, #87CEEB);
+            border-radius: 2px;
+        }
+
+        .new-account-login p {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .new-account-login a {
+            color: #4682B4;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .new-account-login a:hover {
+            color: #87CEEB;
+            text-shadow: 0 2px 4px rgba(135, 206, 235, 0.3);
+        }
+
+        /* Card styling */
+        .odr-box, .order-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(135, 206, 235, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .odr-box::before, .order-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(135, 206, 235, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .odr-box:hover::before, .order-box:hover::before {
+            left: 100%;
+        }
+
+        .odr-box:hover, .order-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(135, 206, 235, 0.3);
+        }
+
+        .title-left h3 {
+            color: #4682B4;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            position: relative;
+        }
+
+        .title-left h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #4682B4, #87CEEB);
+            border-radius: 2px;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Cart items styling */
+        .bg-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+            border-radius: 15px;
+            border: 1px solid rgba(135, 206, 235, 0.2);
+        }
+
+        .media {
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .media:hover {
+            background: rgba(135, 206, 235, 0.1);
+            transform: translateX(5px);
+        }
+
+        .media-body a {
+            color: #4682B4;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .media-body a:hover {
+            color: #87CEEB;
+            text-shadow: 0 2px 4px rgba(135, 206, 235, 0.3);
+        }
+
+        .small.text-muted {
+            color: #6c757d !important;
+            font-size: 0.9rem;
+        }
+
+        /* Order summary styling */
+        .order-box .d-flex {
+            margin-bottom: 15px;
+            padding: 10px 0;
+            align-items: center;
+        }
+
+        .order-box h4, .order-box h5 {
+            color: #333;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .font-weight-bold {
+            color: #4682B4 !important;
+            font-weight: 600 !important;
+        }
+
+        .gr-total {
+            background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(176, 224, 230, 0.1) 100%);
+            border-radius: 10px;
+            padding: 20px 15px;
+            margin: 20px 0;
+        }
+
+        .gr-total h5 {
+            color: #4682B4;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .gr-total .h5 {
+            color: #4682B4;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        /* Button styling */
+        .btn.hvr-hover {
+            background: linear-gradient(135deg, #4682B4 0%, #87CEEB 50%, #B0E0E6 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(135, 206, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn.hvr-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn.hvr-hover:hover::before {
+            left: 100%;
+        }
+
+        .btn.hvr-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(135, 206, 235, 0.4);
+            background: linear-gradient(135deg, #5a9bd4 0%, #87CEEB 50%, #B0E0E6 100%);
+        }
+
+        .btn.hvr-hover:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .all-title-box h2 {
+                font-size: 2rem;
+            }
+            
+            .all-title-box {
+                padding: 60px 0;
+            }
+            
+            .odr-box, .order-box {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .title-left h3 {
+                font-size: 1.5rem;
+            }
+            
+            .btn.hvr-hover {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(135, 206, 235, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Pulse animation for important elements */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(135, 206, 235, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4682B4, #87CEEB);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a9bd4, #9dd6eb);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating decorative elements -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <!-- Start All Title Box -->
     <div class="all-title-box">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <h2>Checkout</h2>
+                    <h2><i class="fas fa-shopping-cart me-3"></i>Checkout</h2>
                 </div>
             </div>
         </div>
@@ -17,109 +464,70 @@
     <!-- Start Checkout -->
     <div class="checkout-box-main">
         <div class="container">
-            <div class="row new-account-login">
-                {% if not user.is_authenticated %}
-                <div class="col-md-12">
-                    <div class="title-left">
-                        <h3>Returning Customer?</h3>
-                    </div>
-                    <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <p>Or continue as guest.</p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
 
             <div class="row">
                 <div class="col-lg-12 mb-3">
                     <div class="row">
                         <div class="col-md-8 offset-md-2 col-lg-8 offset-lg-2">
-                            <div class="odr-box">
-                                <div class="title-left">
-                                    <h3>Shopping cart</h3>
-                                </div>
-                                <div class="rounded p-2 bg-light">
-                                    {% if cart_items %}
-                                        {% for item in cart_items %}
-                                        <div class="media mb-2 border-bottom">
-                                            <div class="media-body">
-                                                <a href="{% url 'shop_detail' %}?product_id={{ item.product.id }}">{{ item.product.name }}</a>
-                                                <div class="small text-muted">
-                                                    Price: Rp {{ item.product.price|floatformat:0 }}
-                                                    <span class="mx-2">|</span>
-                                                    Qty: {{ item.quantity }}
-                                                    <span class="mx-2">|</span>
-                                                    Subtotal: Rp {{ item.get_total_item_price|floatformat:0 }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    {% else %}
-                                        <p>Your cart is empty.</p>
-                                    {% endif %}
-                                </div>
-                            </div>
                         </div>
                         <div class="col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-4">
                             <div class="order-box">
                                 <div class="title-left">
-                                    <h3>Your order</h3>
+                                    <h3><i class="fas fa-receipt me-2"></i>Your Order</h3>
                                 </div>
                                 <div class="d-flex">
-                                    <div class="font-weight-bold">Product</div>
-                                    <div class="ml-auto font-weight-bold">Total</div>
+                                    <div class="font-weight-bold"><i class="fas fa-box me-2"></i>Product</div>
+                                    <div class="ms-auto font-weight-bold"><i class="fas fa-calculator me-2"></i>Total</div>
                                 </div>
                                 <hr class="my-1">
-                                {% if cart_items %}
-                                    {% for item in cart_items %}
-                                    <div class="d-flex">
-                                        <h4>{{ item.product.name }} (x{{ item.quantity }})</h4>
-                                        <div class="ml-auto font-weight-bold"> Rp {{ item.get_total_item_price|floatformat:0 }} </div>
-                                    </div>
-                                    {% endfor %}
-                                {% endif %}
+                                
+                                <div class="d-flex">
+                                    <h4>Premium Wireless Headphones (x1)</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 599,000</div>
+                                </div>
+                                <div class="d-flex">
+                                    <h4>Smartphone Case (x2)</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 178,000</div>
+                                </div>
+                                <div class="d-flex">
+                                    <h4>Bluetooth Speaker (x1)</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 299,000</div>
+                                </div>
+                                
                                 <hr class="my-1">
                                 <div class="d-flex">
-                                    <h4>Sub Total</h4>
-                                    <div class="ml-auto font-weight-bold"> Rp {{ subtotal|floatformat:0 }} </div>
+                                    <h4><i class="fas fa-list me-2"></i>Sub Total</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 1,076,000</div>
                                 </div>
                                 <div class="d-flex">
-                                    <h4>Discount</h4>
-                                    <div class="ml-auto font-weight-bold"> Rp {{ discount|floatformat:0 }} </div>
+                                    <h4><i class="fas fa-percentage me-2"></i>Discount</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 76,000</div>
                                 </div>
                                 <hr class="my-1">
                                 <div class="d-flex">
-                                    <h4>Coupon Discount</h4>
-                                    <div class="ml-auto font-weight-bold"> Rp 0.00 </div> {# Placeholder, implement coupon logic if needed #}
+                                    <h4><i class="fas fa-ticket-alt me-2"></i>Coupon Discount</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 0</div>
                                 </div>
                                 <div class="d-flex">
-                                    <h4>Tax</h4>
-                                    <div class="ml-auto font-weight-bold"> Rp {{ tax|floatformat:0 }} </div>
+                                    <h4><i class="fas fa-file-invoice-dollar me-2"></i>Tax</h4>
+                                    <div class="ms-auto font-weight-bold">Rp 100,000</div>
                                 </div>
-                                <div class="d-flex">
-                                    <h4>Shipping Cost</h4>
-                                    <div class="ml-auto font-weight-bold">
-                                        {% if shipping_cost == 0 %} Free {% else %} Rp {{ shipping_cost|floatformat:0 }} {% endif %}
-                                    </div>
-                                </div>
+                       
                                 <hr>
-                                <div class="d-flex gr-total">
-                                    <h5>Grand Total</h5>
-                                    <div class="ml-auto h5"> Rp {{ grand_total|floatformat:0 }} </div>
+                                <div class="d-flex gr-total pulse">
+                                    <h5><i class="fas fa-money-check-alt me-2"></i>Grand Total</h5>
+                                    <div class="ms-auto h5">Rp 1,100,000</div>
                                 </div>
                                 <hr>
                             </div>
                         </div>
-                        {# Tombol "Place Order" sekarang dalam form untuk submit tradisional #}
+                        
+                        <!-- Place Order Button -->
                         <div class="col-12 d-flex shopping-box justify-content-center mt-4">
-                            <form action="{% url 'checkout_process' %}" method="post">
-                                {% csrf_token %}
-                                <button class="ml-auto btn hvr-hover" type="submit">Place Order & Get Invoice</button>
+                            <form action="#" method="post">
+                                <button class="ms-auto btn hvr-hover" type="submit" onclick="showLoading()">
+                                    <i class="fas fa-credit-card me-2"></i>Place Order & Get Invoice
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -129,26 +537,83 @@
     </div>
     <!-- End Checkout -->
 
-{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show loading animation
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+            
+            // Hide loading after 3 seconds (simulate processing)
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }, 3000);
+        }
 
-{% block extra_js %}
-{# jQuery tetap dimuat untuk skrip lain jika ada #}
-<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
-<script src="{% static 'js/popper.min.js' %}"></script>
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-<script src="{% static 'js/jquery.superslides.min.js' %}"></script>
-<script src="{% static 'js/bootstrap-select.js' %}"></script>
-<script src="{% static 'js/inewsticker.js' %}"></script>
-<script src="{% static 'js/bootsnav.js' %}"></script>
-<script src="{% static 'js/images-loded.min.js' %}"></script>
-<script src="{% static 'js/isotope.min.js' %}"></script>
-<script src="{% static 'js/owl.carousel.min.js' %}"></script>
-<script src="{% static 'js/baguetteBox.min.js' %}"></script>
-<script src="{% static 'js/form-validator.min.js' %}"></script>
-<script src="{% static 'js/contact-form-script.js' %}"></script>
-<script src="{% static 'js/custom.js' %}"></script>
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
 
-{# Skrip AJAX yang sebelumnya untuk Place Order dihapus karena menggunakan submit form tradisional #}
-{# Anda bisa menambahkan skrip JavaScript lain di sini jika diperlukan #}
+        // Add hover effects to cart items
+        document.querySelectorAll('.media').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add click effect to buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
 
 {% endblock %}

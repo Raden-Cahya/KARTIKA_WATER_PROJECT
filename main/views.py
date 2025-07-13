@@ -4,18 +4,22 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse # Import HttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.db import transaction
-from .models import Product, Cart, CartItem, Order, OrderItem
+from django.views.decorators.http import require_GET
 import json
+
+# --- IMPORT MODEL-MODEL ANDA DARI main/models.py ---
+# Ini adalah bagian yang hilang/salah di file Anda sebelumnya
+from .models import Product, Cart, CartItem, Order, OrderItem, UserProfile 
 
 # Import untuk PDF
 from django.template.loader import get_template
 from weasyprint import HTML, CSS
-from django.conf import settings # Untuk mengakses pengaturan seperti STATIC_ROOT jika diperlukan
+from django.conf import settings
 
 # Import form kustom kita dari main/forms.py
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, UserUpdateForm, UserProfileForm 
 
 
 # --- Views Halaman Statis ---
@@ -71,10 +75,55 @@ def contact(request):
 def gallery(request):
     return render(request, 'gallery.html')
 
+# View untuk halaman My Account (menampilkan riwayat pesanan dan profil)
 @login_required
 def my_account(request):
+    """
+    View untuk halaman My Account.
+    Menampilkan riwayat pesanan dan memungkinkan pengguna mengedit nama depan dan nomor telepon profil mereka.
+    """
+    # Pastikan UserProfile ada atau dibuat untuk pengguna yang login
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        # Inisialisasi kedua form dengan data POST dan instance yang sesuai
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, instance=user_profile)
+
+        # Validasi dan simpan kedua form
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save() # Simpan perubahan first_name pada model User
+            profile_form.save() # Simpan perubahan phone_number pada model UserProfile
+            messages.success(request, "Informasi profil Anda berhasil diperbarui.")
+            return redirect('my_account') # Redirect untuk menghindari pengiriman form ganda
+        else:
+            messages.error(request, "Terjadi kesalahan saat memperbarui informasi profil Anda.")
+            # Tambahkan detail error dari form
+            if user_form.errors:
+                for field, errors in user_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error pada Nama Pelanggan: {error}")
+            if profile_form.errors:
+                for field, errors in profile_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Error pada Nomor Telepon: {error}")
+    else:
+        # Tampilkan form dengan data yang sudah ada
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = UserProfileForm(instance=user_profile)
+
+    # Ambil riwayat pesanan pengguna
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'my-account.html', {'orders': orders})
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user_profile': user_profile, # Diperlukan untuk menampilkan phone_number saat ini
+        'orders': orders,
+        'user': request.user, # Objek user juga diperlukan untuk username dan email
+    }
+    return render(request, 'my-account.html', context)
+
 
 def shop_detail(request):
     product_id = request.GET.get('product_id')
@@ -107,7 +156,8 @@ def login_page(request):
             messages.error(request, "Silakan masukkan username dan password yang valid.")
     else:
         form = CustomAuthenticationForm()
-    return render(request, 'auth/index.html', {'form': form})
+    # PERBAIKAN: Mengubah nama template dari 'auth/index.html' menjadi 'auth/login.html'
+    return render(request, 'auth/login.html', {'form': form})
 
 def register(request):
     if request.method == 'POST':
@@ -122,6 +172,7 @@ def register(request):
         form = CustomUserCreationForm()
     return render(request, 'auth/register.html', {'form': form})
 
+@require_GET
 def user_logout(request):
     logout(request)
     messages.info(request, "Anda telah berhasil logout.")
@@ -245,19 +296,25 @@ def checkout_process(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Hitung total_order_amount sebelum membuat Order
                 total_order_amount = sum(item.get_total_item_price() for item in cart_items)
+
+                # Dapatkan data profil pengguna dari User dan UserProfile
+                user_first_name = request.user.first_name if request.user.first_name else ''
+                user_email = request.user.email if request.user.email else ''
+                # Pastikan UserProfile ada sebelum mencoba mengaksesnya
+                user_phone_number = request.user.profile.phone_number if hasattr(request.user, 'profile') and request.user.profile.phone_number else ''
+
 
                 order = Order.objects.create(
                     user=request.user,
-                    first_name=request.user.first_name if request.user.first_name else '',
-                    last_name=request.user.last_name if request.user.last_name else '',
-                    email=request.user.email if request.user.email else '',
-                    phone_number='', # Pastikan ini diisi jika ada di User model atau dihapus jika tidak perlu
+                    first_name=user_first_name, # Menggunakan first_name dari user
+                    last_name='', # last_name dikosongkan sesuai permintaan
+                    email=user_email,
+                    phone_number=user_phone_number, # Menggunakan phone_number dari UserProfile
                     shipping_address='N/A (No shipping address required)',
                     payment_method='Direct Payment',
-                    total_amount=total_order_amount, # Set total_amount
-                    status='Pending' # Set status order menjadi 'Pending'
+                    total_amount=total_order_amount,
+                    status='Pending'
                 )
                 
                 for item in cart_items:
@@ -274,7 +331,7 @@ def checkout_process(request):
                         messages.error(request, f"Stok tidak mencukupi untuk '{item.product.name}'. Silakan sesuaikan kuantitas di keranjang.")
                         raise Exception(f"Stok tidak mencukupi untuk '{item.product.name}'")
             
-                cart_items.delete() # Kosongkan keranjang setelah order berhasil
+                cart_items.delete()
 
                 # --- Bagian untuk membuat PDF Invoice ---
                 template = get_template('invoice.html') # Mengambil template invoice

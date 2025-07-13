@@ -2,118 +2,383 @@
 {% load static %}
 
 {% block content %}
-    <div class="all-title-box">
+<style>
+    /* Shop Page Styles */
+    .shop-container {
+        background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 50%, #FFFFFF 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .shop-title-box {
+        background: linear-gradient(135deg, #4682B4, #87CEEB);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .shop-title-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .shop-title-box h2 {
+        color: white;
+        font-size: 3rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .notification-card {
+        background: linear-gradient(135deg, #4CAF50, #81C784);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        backdrop-filter: blur(10px);
+        color: white;
+        margin: 20px 0;
+    }
+
+    .filter-section {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 30px 0;
+        box-shadow: 0 15px 35px rgba(135, 206, 235, 0.2);
+    }
+
+    .custom-select {
+        border: 2px solid #87CEEB;
+        border-radius: 10px;
+        padding: 10px;
+        background: white;
+        color: #4682B4;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .custom-select:focus {
+        outline: none;
+        border-color: #4682B4;
+        box-shadow: 0 0 15px rgba(135, 206, 235, 0.5);
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 20px 0;
+    }
+
+    .product-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(135, 206, 235, 0.2);
+        transition: all 0.4s ease;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+
+    .product-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 25px 50px rgba(135, 206, 235, 0.4);
+    }
+
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        height: 250px;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .product-label {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .label-new {
+        background: linear-gradient(135deg, #4CAF50, #81C784);
+        color: white;
+    }
+
+    .label-sale {
+        background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+        color: white;
+    }
+
+    .label-sold-out {
+        background: linear-gradient(135deg, #757575, #9E9E9E);
+        color: white;
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(135, 206, 235, 0.9), rgba(70, 130, 180, 0.9));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .cart-button {
+        background: linear-gradient(135deg, #4682B4, #87CEEB);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(70, 130, 180, 0.3);
+    }
+
+    .cart-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(70, 130, 180, 0.5);
+        color: white;
+    }
+
+    .cart-button.disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .product-info {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .product-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #4682B4;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2E7D32;
+        margin-bottom: 5px;
+    }
+
+    .product-stock {
+        font-size: 0.9rem;
+        color: #666;
+        background: rgba(135, 206, 235, 0.2);
+        padding: 5px 12px;
+        border-radius: 15px;
+        display: inline-block;
+    }
+
+    .view-cart-section {
+        background: linear-gradient(135deg, #87CEEB, #4682B4);
+        padding: 40px 0;
+        margin-top: 40px;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .view-cart-btn {
+        background: white;
+        color: #4682B4;
+        border: 3px solid white;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .view-cart-btn:hover {
+        background: transparent;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Floating Animation Elements */
+    .floating-element {
+        position: absolute;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .shop-title-box h2 {
+            font-size: 2rem;
+        }
+        
+        .products-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            border-radius: 15px;
+        }
+        
+        .product-image-container {
+            height: 200px;
+        }
+    }
+</style>
+
+<div class="shop-container">
+    <div class="shop-title-box">
         <div class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <h2>Shop</h2>
+                <div class="col-lg-12 text-center">
+                    <h2>Our Amazing Shop</h2>
                 </div>
             </div>
         </div>
     </div>
-    <div class="shop-box-inner">
-        <div class="container">
-            {# Bagian untuk menampilkan notifikasi #}
-            <div id="add-to-cart-notification" class="alert alert-success mt-3" style="display: none;">
-                <span id="notification-message"></span>
-                {# Tombol "Lihat Keranjang" dihapus dari sini #}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
 
-            <div class="row">
-                <div class="col-sm-12 col-xs-12 shop-content-right">
-                    <div class="right-product-box">
-                        <div class="product-item-filter row">
-                            <div class="col-12 col-sm-8 text-center text-sm-left">
-                                <div class="toolbar-sorter-right">
-                                    <span>Sort by </span>
-                                    <select id="basic" class="selectpicker show-tick form-control" data-placeholder="$ USD">
-                                        <option data-display="Select">Nothing</option>
-                                        <option value="1">Popularity</option>
-                                        <option value="2">High Price &rarr; High Price</option>
-                                        <option value="3">Low Price &rarr; High Price</option>
-                                        <option value="4">Best Selling</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-12 col-sm-4 text-center text-sm-right">
-                                <ul class="nav nav-tabs ml-auto">
-                                    <li>
-                                        <a class="nav-link active" href="#grid-view" data-toggle="tab"> <i class="fa fa-th"></i> </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+    <div class="container">
+        <!-- Notification Section -->
+        <div id="add-to-cart-notification" class="notification-card alert" style="display: none;">
+            <span id="notification-message"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
 
-                        <div class="product-categorie-box">
-                            <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane fade show active" id="grid-view">
-                                    <div class="row">
-                                        {% for product in products %}
-                                        <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
-                                            <div class="products-single fix">
-                                                <div class="box-img-hover">
-                                                    <div class="type-lb">
-                                                        {% if product.stock == 0 %}
-                                                            <p class="sold-out">Sold Out</p>
-                                                        {% elif product.price > 50 %}
-                                                            <p class="sale">Sale</p>
-                                                        {% else %}
-                                                            <p class="new">New</p>
-                                                        {% endif %}
-                                                    </div>
-                                                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/default_product.jpg' %}{% endif %}" class="img-fluid" alt="Image">
-                                                    <div class="mask-icon">
-                                                        
-                                                        {# Form untuk tombol Add to Cart #}
-                                                        {% if user.is_authenticated %}
-                                                            {% if product.stock > 0 %}
-                                                            <form class="add-to-cart-form" data-product-id="{{ product.id }}" method="post" action="{% url 'add_to_cart' product.id %}">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="product_id" value="{{ product.id }}">
-                                                                <button type="submit" class="cart">Add to Cart</button>
-                                                            </form>
-                                                            {% else %}
-                                                            <button type="button" class="cart disabled">Sold Out</button>
-                                                            {% endif %}
-                                                        {% else %}
-                                                            <a href="{% url 'login' %}" class="cart">Login to Add</a>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                                <div class="why-text">
-                                                    <h4>{{ product.name }}</h4>
-                                                    <h5>Rp {{ product.price|floatformat:0 }}</h5>
-                                                    <h5>stock {{ product.stock}}</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row align-items-center">
+                <div class="col-12 col-sm-8">
+                    <div class="d-flex align-items-center">
+                        <span class="mr-3" style="color: #4682B4; font-weight: 600;">Sort by:</span>
+                        <select id="basic" class="custom-select">
+                            <option data-display="Select">Choose Option</option>
+                            <option value="1">Popularity</option>
+                            <option value="2">High Price → Low Price</option>
+                            <option value="3">Low Price → High Price</option>
+                            <option value="4">Best Selling</option>
+                        </select>
                     </div>
                 </div>
+                <div class="col-12 col-sm-4 text-right">
+                    <i class="fa fa-th" style="color: #4682B4; font-size: 1.5rem;"></i>
+                </div>
             </div>
-            {# Tombol "Lihat Keranjang" dipindahkan ke sini, di bagian bawah container #}
-            <div class="row my-5">
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/default_product.jpg' %}{% endif %}" 
+                         class="product-image" alt="{{ product.name }}">
+                    
+                    <!-- Product Labels -->
+                    <div class="product-label {% if product.stock == 0 %}label-sold-out{% elif product.price > 50 %}label-sale{% else %}label-new{% endif %}">
+                        {% if product.stock == 0 %}
+                            Sold Out
+                        {% elif product.price > 50 %}
+                            Sale
+                        {% else %}
+                            New
+                        {% endif %}
+                    </div>
+
+                    <!-- Product Overlay -->
+                    <div class="product-overlay">
+                        {% if user.is_authenticated %}
+                            {% if product.stock > 0 %}
+                            <form class="add-to-cart-form" data-product-id="{{ product.id }}" method="post" action="{% url 'add_to_cart' product.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <button type="submit" class="cart-button">Add to Cart</button>
+                            </form>
+                            {% else %}
+                            <button type="button" class="cart-button disabled">Sold Out</button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'login' %}" class="cart-button">Login to Add</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="product-info">
+                    <h4 class="product-name">{{ product.name }}</h4>
+                    <h5 class="product-price">Rp {{ product.price|floatformat:0 }}</h5>
+                    <div class="product-stock">Stock: {{ product.stock }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- View Cart Section -->
+        <div class="view-cart-section">
+            <div class="row">
                 <div class="col-lg-12 text-center">
-                    <a href="{% url 'cart' %}" class="btn hvr-hover">Lihat Keranjang</a>
+                    <a href="{% url 'cart' %}" class="view-cart-btn">View Cart</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-{# Pastikan Anda memuat jQuery, jika belum ada di template main.html atau base.html Anda #}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Fungsi untuk mendapatkan CSRF token dari cookie
+    // CSRF Token function
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -130,16 +395,16 @@ $(document).ready(function() {
     }
     const csrftoken = getCookie('csrftoken');
 
-    // Event listener untuk form Add to Cart
+    // Add to Cart AJAX
     $('.add-to-cart-form').on('submit', function(e) {
-        e.preventDefault(); // Mencegah form disubmit secara tradisional (page reload)
+        e.preventDefault();
         
         var $this = $(this);
         var productId = $this.data('product-id');
-        var formData = $this.serialize(); // Ambil semua data form, termasuk csrf_token dan product_id
+        var formData = $this.serialize();
 
         $.ajax({
-            url: $this.attr('action'), // Gunakan URL dari atribut 'action' form
+            url: $this.attr('action'),
             method: 'POST',
             data: formData,
             success: function(response) {
@@ -147,23 +412,23 @@ $(document).ready(function() {
                 let notificationMessage = $('#notification-message');
 
                 if (response.status === 'success') {
-                    notificationMessage.text('Pesanan "' + response.product_name + '" telah masuk ke dalam keranjang!');
-                    notificationDiv.removeClass('alert-warning').addClass('alert-success');
+                    notificationMessage.text('Product "' + response.product_name + '" added to cart!');
+                    notificationDiv.removeClass('alert-warning alert-danger').addClass('alert-success');
                 } else if (response.status === 'warning') {
-                    notificationMessage.text(response.message); // Pesan seperti "Stok maksimum telah tercapai"
-                    notificationDiv.removeClass('alert-success').addClass('alert-warning');
+                    notificationMessage.text(response.message);
+                    notificationDiv.removeClass('alert-success alert-danger').addClass('alert-warning');
                 } else {
-                    notificationMessage.text('Terjadi kesalahan: ' + response.message);
-                    notificationDiv.removeClass('alert-success').addClass('alert-danger');
+                    notificationMessage.text('Error: ' + response.message);
+                    notificationDiv.removeClass('alert-success alert-warning').addClass('alert-danger');
                 }
-                notificationDiv.fadeIn().delay(3000).fadeOut(); // Tampilkan notifikasi selama 3 detik
+                notificationDiv.fadeIn().delay(3000).fadeOut();
             },
             error: function(xhr, status, error) {
                 console.error('AJAX Error:', status, error);
                 let notificationDiv = $('#add-to-cart-notification');
                 let notificationMessage = $('#notification-message');
-                notificationMessage.text('Terjadi kesalahan saat menambahkan produk ke keranjang.');
-                notificationDiv.removeClass('alert-success').addClass('alert-danger').fadeIn().delay(3000).fadeOut();
+                notificationMessage.text('Error adding product to cart.');
+                notificationDiv.removeClass('alert-success alert-warning').addClass('alert-danger').fadeIn().delay(3000).fadeOut();
             }
         });
     });

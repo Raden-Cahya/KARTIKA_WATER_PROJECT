@@ -1,79 +1,496 @@
-    <!-- Start Footer  -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kartika Water Footer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .col-lg-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 15px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            position: relative;
+            overflow: hidden;
+            margin-top: auto;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="wave" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0,50 Q25,30 50,50 T100,50 L100,100 L0,100 Z" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23wave)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .footer-main {
+            position: relative;
+            z-index: 2;
+            padding: 60px 0 40px;
+        }
+
+        .footer-top-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-top-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .footer-top-box:hover::before {
+            animation: shimmer 1.5s ease-in-out;
+        }
+
+        .footer-top-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-top-box h3 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .footer-top-box h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.3));
+            border-radius: 2px;
+        }
+
+        .list-time {
+            list-style: none;
+        }
+
+        .list-time li {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .list-time li::before {
+            content: '🕐';
+            position: absolute;
+            left: 0;
+            font-size: 14px;
+        }
+
+        .list-time li:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .list-time li span {
+            color: #ffcccb;
+            font-weight: 600;
+        }
+
+        .footer-top-box p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .footer-top-box ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-top-box ul li a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-top-box ul li a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .footer-top-box ul li a:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .footer-top-box ul li a:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-main hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            margin: 40px 0;
+        }
+
+        .footer-widget {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .footer-widget:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-widget h4 {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-widget p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .footer-link-contact {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .footer-link-contact:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-link-contact h4 {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-link-contact ul {
+            list-style: none;
+        }
+
+        .footer-link-contact ul li {
+            margin-bottom: 15px;
+        }
+
+        .footer-link-contact ul li p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .footer-link-contact ul li p i {
+            color: #ffffff;
+            font-size: 18px;
+            margin-top: 2px;
+            min-width: 20px;
+        }
+
+        .footer-link-contact ul li p a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-link-contact ul li p a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.3));
+            transition: width 0.3s ease;
+        }
+
+        .footer-link-contact ul li p a:hover::after {
+            width: 100%;
+        }
+
+        .footer-link-contact ul li p a:hover {
+            color: #f0f8ff;
+        }
+
+        .footer-copyright {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer-company {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .footer-company a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-company a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.3));
+            transition: width 0.3s ease;
+        }
+
+        .footer-company a:hover::after {
+            width: 100%;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .footer-widget,
+        .footer-link-contact {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .footer-link-contact {
+            animation-delay: 3s;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .col-lg-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .footer-main {
+                padding: 40px 0 30px;
+            }
+            
+            .footer-top-box,
+            .footer-widget,
+            .footer-link-contact {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .footer-top-box h3,
+            .footer-widget h4,
+            .footer-link-contact h4 {
+                font-size: 20px;
+            }
+            
+            .footer-top-box ul {
+                justify-content: center;
+            }
+        }
+
+        /* Demo content untuk menunjukkan footer di bagian bawah */
+        .demo-content {
+            padding: 50px 0;
+            text-align: center;
+            color: #4682B4;
+        }
+
+        .demo-content h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-content p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo content -->
+    <div class="demo-content">
+        <div class="container">
+            <h1>Kartika Water</h1>
+            <p>Halaman demo untuk menampilkan footer dengan tema biru muda dan putih yang modern</p>
+        </div>
+    </div>
+
+    <!-- Start Footer -->
     <footer>
         <div class="footer-main">
             <div class="container">
-				<div class="row">
-					<div class="col-lg-6 col-md-12 col-sm-12">
-						<div class="footer-top-box">
-							<h3>Business Time</h3>
-							<ul class="list-time">
-								<li>Monday - Friday: 08.00am to 05.00pm</li> <li>Saturday: 10.00am to 08.00pm</li> <li>Sunday: <span>Closed</span></li>
-							</ul>
-						</div>
-					</div>
-					<!-- <div class="col-lg-4 col-md-12 col-sm-12">
-						<div class="footer-top-box">
-							<h3>Newsletter</h3>
-							<form class="newsletter-box">
-								<div class="form-group">
-									<input class="" type="email" name="Email" placeholder="Email Address*" />
-									<i class="fa fa-envelope"></i>
-								</div>
-								<button class="btn hvr-hover" type="submit">Submit</button>
-							</form>
-						</div>
-					</div> -->
-					<div class="col-lg-6 col-md-12 col-sm-12">
-						<div class="footer-top-box">
-							<h3>Social Media</h3>
-							<p>Tetap terhubung untuk info promo, produk terbaru, dan tips hidup sehat dari Kartika Water!</p>
-							<ul>
-                                <!-- <li><a href="#"><i class="fab fa-facebook" aria-hidden="true"></i></a></li> -->
-                                <!-- <li><a href="#"><i class="fab fa-twitter" aria-hidden="true"></i></a></li> -->
-                                <!-- <li><a href="#"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li> -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="footer-top-box">
+                            <h3>Business Time</h3>
+                            <ul class="list-time">
+                                <li>Monday - Friday: 08.00am to 05.00pm</li>
+                                <li>Saturday: 10.00am to 08.00pm</li>
+                                <li>Sunday: <span>Closed</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="footer-top-box">
+                            <h3>Social Media</h3>
+                            <p>Tetap terhubung untuk info promo, produk terbaru, dan tips hidup sehat dari Kartika Water!</p>
+                            <ul>
                                 <li><a href="#"><i class="fab fa-google-plus" aria-hidden="true"></i></a></li>
-                                <!-- <li><a href="#"><i class="fa fa-rss" aria-hidden="true"></i></a></li> -->
-                                <!-- <li><a href="#"><i class="fab fa-pinterest-p" aria-hidden="true"></i></a></li> -->
                                 <li><a href="#"><i class="fab fa-whatsapp" aria-hidden="true"></i></a></li>
                             </ul>
-						</div>
-					</div>
-				</div>
-				<hr>
+                        </div>
+                    </div>
+                </div>
+                <hr>
                 <div class="row">
-                    <div class="col-lg-6 col-md-12 col-sm-12">
+                    <div class="col-lg-6">
                         <div class="footer-widget">
                             <h4>About KARTIKA WATER</h4>
                             <p>Kartika Water adalah layanan distribusi air minum yang mengedepankan kualitas, kepraktisan, dan kepercayaan. Kami menyediakan berbagai jenis air minum seperti galon isi ulang serta air kemasan 1500ml, 600ml, dan 400ml yang siap memenuhi kebutuhan air bersih keluarga Anda setiap hari.</p>
-                            <p>Dengan sistem pemesanan online yang mudah diakses melalui website, kami berkomitmen menghadirkan pengalaman belanja yang cepat, nyaman, dan modern. Kami percaya bahwa setiap orang berhak mendapatkan akses terhadap air minum berkualitas.</p> 
-							<p>Melalui digitalisasi layanan, Kartika Water hadir sebagai solusi terpercaya untuk memberikan kemudahan, kecepatan, dan kenyamanan dalam setiap tetes air yang Anda konsumsi.</p> 							
+                            <p>Dengan sistem pemesanan online yang mudah diakses melalui website, kami berkomitmen menghadirkan pengalaman belanja yang cepat, nyaman, dan modern. Kami percaya bahwa setiap orang berhak mendapatkan akses terhadap air minum berkualitas.</p>
+                            <p>Melalui digitalisasi layanan, Kartika Water hadir sebagai solusi terpercaya untuk memberikan kemudahan, kecepatan, dan kenyamanan dalam setiap tetes air yang Anda konsumsi.</p>
                         </div>
                     </div>
-                    <!-- <div class="col-lg-4 col-md-12 col-sm-12">
-                        <div class="footer-link">
-                            <h4>Information</h4>
-                            <ul>
-                                <li><a href="{% url 'about' %}">About Us</a></li>
-                                <li><a href="#">Customer Service</a></li>
-                                <li><a href="#">Our Sitemap</a></li>
-                                <li><a href="#">Terms &amp; Conditions</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
-                                <li><a href="#">Delivery Information</a></li>
-                            </ul>
-                        </div>
-                    </div> -->
-                    <div class="col-lg-6 col-md-12 col-sm-12">
+                    <div class="col-lg-6">
                         <div class="footer-link-contact">
                             <h4>Contact Us</h4>
                             <ul>
                                 <li>
-                                    <p><i class="fas fa-map-marker-alt"></i>Jl. Batu Ampar 1 No.8, RT.4/RW.2, Batu Ampar, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13520 </p>
+                                    <p><i class="fas fa-map-marker-alt"></i>Jl. Batu Ampar 1 No.8, RT.4/RW.2, Batu Ampar, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13520</p>
                                 </li>
                                 <li>
-                                    <p><i class="fas fa-phone-square"></i>Phone: <a href="tel:+1-888705770">+62 819-0499-9900</a></p>
+                                    <p><i class="fas fa-phone-square"></i>Phone: <a href="tel:+62819-0499-9900">+62 819-0499-9900</a></p>
                                 </li>
                                 <li>
-                                    <p><i class="fas fa-envelope"></i>Email: <a href="kartikawater@gmail.com">contactinfo@gmail.com</a></p>
+                                    <p><i class="fas fa-envelope"></i>Email: <a href="mailto:kartikawater@gmail.com">kartikawater@gmail.com</a></p>
                                 </li>
                             </ul>
                         </div>
@@ -82,11 +499,12 @@
             </div>
         </div>
     </footer>
-    <!-- End Footer  -->
+    <!-- End Footer -->
 
-    <!-- Start copyright  -->
+    <!-- Start copyright -->
     <div class="footer-copyright">
-        <p class="footer-company">All Rights Reserved. &copy; 2025 <a href="#">Kartika Water</a> Design & Development By :
-            <a href="https://html.design/">Raden Cahya Kartika</a></p>
+        <p class="footer-company">All Rights Reserved. &copy; 2025 <a href="#">Kartika Water</a> Design & Development By: <a href="https://html.design/">Raden Cahya Kartika</a></p>
     </div>
-    <!-- End copyright  -->
+    <!-- End copyright -->
+</body>
+</html>
